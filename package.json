@@ -4,13 +4,14 @@
     "description": "ALX Webstack Portfolio Project <br /> Learning Management System API",
     "main": "server.js",
     "scripts": {
-        "start": "nodemon server.js"
+        "devStart": "nodemon server.js"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "express": "^4.19.2"
+        "express": "^4.19.2",
+        "jsonwebtoken": "^9.0.2"
     },
     "devDependencies": {
         "nodemon": "^3.1.4"
