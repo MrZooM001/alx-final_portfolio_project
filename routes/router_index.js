@@ -1,13 +1,19 @@
 import express from 'express';
-import dbClient from 'db.js';
+import AppController from '../controllers/AppController.js';
 
 const router = express.Router();
 
+// Homepage routes include welcome message
 router.get('/', async (req, res) => {
-  // check MongoDB connection and reading data from database
-  const countUsers = await dbClient.countUsers();
-  const countCourses = await dbClient.countCourses();
-  res.status(200).json({ message: "Hi fellas!", countUsers, countCourses });
+  res.status(200).json({ greeting: "Hi fellas!",
+    message: "Welcome to Innovative Learning Platform - LMS API",
+   });
 });
+
+// Shows server status
+router.get('/status', AppController.getStatus);
+
+// Shows collections statistics from database
+router.get('/stats', AppController.getStats);
 
 export default router;

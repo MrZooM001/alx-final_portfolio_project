@@ -48,8 +48,6 @@ class DBClient {
    *
    * @returns {Promise<number>} The number of users in the database.
    * If the database is not connected, returns 0.
-   *
-   * @throws throws an error if there is a problem with database connection.
    */
   async countUsers() {
     if (!this.isAlive()) return 0;
@@ -61,8 +59,6 @@ class DBClient {
    *
    * @returns {Promise<number>} The number of courses in the database.
    * If the database is not connected, returns 0.
-   *
-   * @throws throws an error if there is a problem with database connection.
    */
   async countCourses() {
     if (!this.isAlive()) return 0;
