@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
-import bcrypt from 'bcrypt';
+import { hashPassword, isMatchedPassword } from '../middlewares/hashPasswordMiddleware.js';
+
 
 const userSchema = new Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
@@ -9,6 +10,10 @@ const userSchema = new Schema({
   dateOfBirth: { type: Date },
   role: { type: String, enum: ['student', 'instructor', 'admin'], default: 'student' },
 }, { timestamps: true });
+
+userSchema.pre('save', hashPassword);
+
+userSchema.methods.isMatchedPassword = isMatchedPassword;
 
 const User = model('user', userSchema);
 export default User;
