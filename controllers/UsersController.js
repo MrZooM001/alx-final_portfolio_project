@@ -3,7 +3,6 @@ import { signAccessToken, verifyAccessToken, signRefreshToken, verifyRefreshToke
 import userModel from '../models/UserModel.js';
 import { getActiveSessions } from '../helpers/sessionHelpers.js';
 
-
 class UsersController {
   static async registerUser(req, res) {
     try {

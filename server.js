@@ -17,5 +17,10 @@ app.use('/auth/', authRouter);
 app.use('/users/', usersRouter);
 
 app.listen(API_PORT, () => {
-  console.log(`Innovative Learning Platform API server is listening on http://localhost:/${API_PORT}`);
+  console.log(`
+    \t◤⁗‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷◥
+    \t|    Innovative Learning Platform API    |
+    \t|       Learning Management System       |
+    \t◣…………………………………………………………………………………………………………◢
+\nServer is listening on http://localhost:/${API_PORT}\n`);
 });
