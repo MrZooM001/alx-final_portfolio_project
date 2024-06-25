@@ -6,7 +6,7 @@ const validateUserSchema = Joi.object({
   firstName: Joi.string().trim(),
   lastName: Joi.string().trim(),
   dateOfBirth: Joi.date().greater('1-1-1934').less('now'),
-  role: Joi.string().valid('student', 'instructor', 'admin').default('student'),
+  role: Joi.string().lowercase().valid('student', 'instructor', 'admin').default('student'),
 });
 
 const validateCourseSchema = Joi.object({

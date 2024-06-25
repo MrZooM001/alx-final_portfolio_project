@@ -1,16 +1,12 @@
-import { validateUserSchema, validateCourseSchema } from '../helpers/schemaValidation.js';
+import { validateUserSchema, validateCourseSchema } from '../helpers/schemaValidationHelpers.js';
+import { signAccessToken, verifyAccessToken, signRefreshToken, verifyRefreshToken } from '../helpers/jwtAuthHelpers.js';
 import userModel from '../models/UserModel.js';
 
 class UsersController {
-  static async registerUser(req, res, next) {
+  static async registerUser(req, res) {
     try {
-      const {
-        email, password, firstName, lastName, role,
-      } = req.body;
+      const { email, firstName, lastName, role } = req.body;
       const validation = await validateUserSchema.validateAsync(req.body);
-
-      // if (!validation.email) return res.status(400).json({ error: 'Missing email' });;
-      // if (!validation.password) return res.status(400).json({ error: 'Missing password' });
 
       const userExists = await userModel.findOne({ email });
       if (userExists) return res.status(400).json({ error: 'email already exists' });
@@ -20,10 +16,16 @@ class UsersController {
         password: validation.password,
         firstName: firstName,
         lastName: lastName,
-        role: role,
+        dateOfBirth: new Date(validation.dateOfBirth),
+        role: role.toLowerCase(),
       });
+
       const savedUser = await user.save();
-      res.status(201).json({ success: true, user: savedUser.email });
+
+      const accessToken = await signAccessToken(savedUser);
+      const refreshToken = await signRefreshToken(savedUser);
+
+      res.status(201).json({ accessToken, refreshToken });
     } catch (err) {
       return res.status(400).json({ error: err.message });
     }
