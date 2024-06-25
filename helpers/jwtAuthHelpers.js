@@ -1,10 +1,9 @@
 import JWT from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import redisClient from '../utils/redis';
+import { env } from 'process';
+import redisClient from '../utils/redis.js';
 
 dotenv.config();
-const ACCESS_SECRET = process.env.ACCESS_TOKEN_SECRET;
-const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
 const signAccessToken = (user) => {
   return new Promise((resolve, reject) => {
@@ -20,7 +19,7 @@ const signAccessToken = (user) => {
       audience: user._id.toString(),
     };
 
-    JWT.sign(payload, ACCESS_SECRET, options, (err, token) => {
+    JWT.sign(payload, env.ACCESS_TOKEN_SECRET, options, (err, token) => {
       if (err) {
         console.error('Error signing access token:', err.message);
         return reject(err);
@@ -38,7 +37,7 @@ const verifyAccessToken = (req, res, next) => {
 
   const token = authHeader.split(' ')[1];
 
-  JWT.verify(token, ACCESS_SECRET, (err, payload) => {
+  JWT.verify(token, env.ACCESS_TOKEN_SECRET, (err, payload) => {
     if (err) {
       const message = err.name === 'JsonWebTokenError' ? 'Unauthorized' : err.message;
       return next(res.status(401).json({ error: message }));
@@ -52,19 +51,26 @@ const signRefreshToken = (user) => {
   return new Promise((resolve, reject) => {
     const payload = {};
     const options = {
-      expiresIn: '1y',
+      expiresIn: '24h',
       issuer: 'InnovativeLearningPlatform',
       audience: user._id.toString(),
     };
-    JWT.sign(payload, REFRESH_SECRET, options, async (err, token) => {
+
+    JWT.sign(payload, env.REFRESH_TOKEN_SECRET, options, async (err, token) => {
       if (err) {
         console.error('Error signing refresh token:', err.message);
         return reject(err);
       }
 
       try {
-        await redisClient.set(user._id.toString(), token, 365 * 24 * 60 * 60);
-        resolve(token);
+        console.log('Setting token in Redis...');
+        const result = await redisClient.set(user._id.toString(), token, 24 * 60 * 60);
+        if (result) {
+          console.log('Token successfully set in Redis');
+          resolve(token);
+        } else {
+          throw new Error('Failed to set token in Redis');
+        }
       } catch (redisErr) {
         console.error('Redis error:', redisErr.message);
         return reject(redisErr);
@@ -75,7 +81,7 @@ const signRefreshToken = (user) => {
 
 const verifyRefreshToken = (refreshToken) => {
   return new Promise((resolve, reject) => {
-    JWT.verify(refreshToken, REFRESH_SECRET, async (err, payload) => {
+    JWT.verify(refreshToken, env.REFRESH_TOKEN_SECRET, async (err, payload) => {
       if (err) return reject(err);
 
       const userId = payload.aud;

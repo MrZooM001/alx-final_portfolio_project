@@ -1,6 +1,7 @@
 import express from 'express';
 import AppController from '../controllers/AppController.js';
 import UserController from '../controllers/UsersController.js';
+import AuthController from '../controllers/AuthController.js';
 
 const router = express.Router();
 
@@ -24,6 +25,14 @@ router.get('/stats', AppController.getStats);
 //#region UserController
 // Register a new user
 router.post('/users/register', UserController.registerUser);
+//#endregion
+
+//#region AuthController
+// Login a user
+router.post('/auth/login', AuthController.loginUser);
+
+// Logout a user
+router.post('/auth/logout', AuthController.logoutUser);
 //#endregion
 
 export default router;

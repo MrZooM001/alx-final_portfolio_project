@@ -6,7 +6,11 @@ import { createClient } from 'redis';
  */
 class RedisClient {
   constructor() {
-    this.client = createClient();
+    this.client = createClient({
+      port: 6379,
+      host: 'localhost',
+    });
+
     this.isConnected = false;
 
     this.client.on('connect', () => {
@@ -34,7 +38,9 @@ class RedisClient {
       process.exit(0);
     });
 
-    this.client.connect();
+    this.client.connect().catch((err) => {
+      console.error('Redis connection error:', err.message || err.toString());
+    })
   }
 
   /**
@@ -59,6 +65,7 @@ class RedisClient {
       this.client.get(key, (err, result) => {
         if (err) {
           reject(err);
+          return;
         }
         resolve(result);
       });
@@ -77,9 +84,10 @@ class RedisClient {
    */
   set(key, value, duration) {
     return new Promise((resolve, reject) => {
-      this.client.setex(key, duration, value, (err) => {
+      this.client.setEx(key, duration, value, (err) => {
         if (err) {
           reject(err);
+          return;
         }
         return resolve(true);
       });
@@ -99,6 +107,7 @@ class RedisClient {
       this.client.del(key, (err) => {
         if (err) {
           reject(err);
+          return;
         }
         resolve(true);
       });

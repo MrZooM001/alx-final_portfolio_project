@@ -1,8 +1,7 @@
-import JWT from 'jsonwebtoken';
-import redisClient from '../utils/redis';
 import { signAccessToken, verifyAccessToken, signRefreshToken, verifyRefreshToken } from '../helpers/jwtAuthHelpers.js';
 import { validateUserSchema, validateCourseSchema } from '../helpers/schemaValidationHelpers.js';
 import userModel from '../models/UserModel.js';
+import redisClient from '../utils/redis.js';
 
 class AuthController {
   static async loginUser(req, res) {
@@ -12,15 +11,23 @@ class AuthController {
       const user = await userModel.findOne({ email: validation.email });
       if (!user) return res.status(401).json({ error: 'Email not found' });
 
-      const validPassword = await user.isMatchedPassword(validation.password);
-      if (!validPassword) return res.status(401).json({ error: 'Invalid Email or password' });
+      const isMatched = await user.isMatchedPassword(validation.password);
+      // ############### Debug ############## 
+      console.log(isMatched);
+      // #################################### 
+      if (!isMatched) return res.status(401).json({ error: 'Invalid Email or password' });
 
       const accessToken = await signAccessToken(user);
+      // ############### Debug ############## 
+      console.log(accessToken);
+      // #################################### 
       const refreshToken = await signRefreshToken(user);
+      // ############### Debug ############## 
+      console.log('refreshToken\t', refreshToken);
+      // #################################### 
       res.status(200).json({ accessToken, refreshToken });
     } catch (err) {
-      res.status(400).json({ error: 'Invalid Email or password' });
-      next(err);
+      res.status(400).json({ error: err.message });
     }
   }
 
@@ -45,5 +52,4 @@ class AuthController {
   }
 }
 
-export const authController = new AuthController();
-export default authController;
+export default AuthController;

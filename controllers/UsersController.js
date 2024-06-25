@@ -16,7 +16,7 @@ class UsersController {
         password: validation.password,
         firstName: firstName,
         lastName: lastName,
-        dateOfBirth: new Date(validation.dateOfBirth),
+        dateOfBirth: validation.dateOfBirth,
         role: role.toLowerCase(),
       });
 
