@@ -47,6 +47,24 @@ const verifyAccessToken = (req, res, next) => {
   });
 };
 
+const blackListRefreshToken = async (token) => {
+  const payload = JWT.decode(token);
+  if (!payload) throw new Error('Invalid Token');
+
+  const expiration = payload.exp;
+  const currentTime = Math.floor(Date.now() / 1000);
+  const ttl = expiration - currentTime;
+
+  if (ttl > 0) {
+    await redisClient.set(`blacklist:${token}`, token, ttl);
+  }
+};
+
+const isBlackListed = async (token) => {
+  const result = await redisClient.get(`blacklist:${token}`);
+  return result !== null;
+};
+
 const signRefreshToken = (user) => {
   return new Promise((resolve, reject) => {
     const payload = {};
@@ -63,10 +81,8 @@ const signRefreshToken = (user) => {
       }
 
       try {
-        console.log('Setting token in Redis...');
         const result = await redisClient.set(user._id.toString(), token, 24 * 60 * 60);
         if (result) {
-          console.log('Token successfully set in Redis');
           resolve(token);
         } else {
           throw new Error('Failed to set token in Redis');
@@ -87,11 +103,16 @@ const verifyRefreshToken = (refreshToken) => {
       const userId = payload.aud;
 
       try {
+        const isBlackListedToken = await isBlackListed(refreshToken);
+        if (isBlackListedToken) {
+          return reject(new Error('Invalid refresh token'));
+        }
+
         const result = await redisClient.get(userId);
         if (refreshToken === result) {
           resolve(userId)
         } else {
-          reject(err);
+          reject(new Error('Invalid refresh token'));
         }
       } catch (redisErr) {
         console.error('Redis error:', redisErr.message);
@@ -101,4 +122,11 @@ const verifyRefreshToken = (refreshToken) => {
   });
 };
 
-export { signAccessToken, verifyAccessToken, signRefreshToken, verifyRefreshToken };
+export {
+  signAccessToken,
+  verifyAccessToken,
+  signRefreshToken,
+  verifyRefreshToken,
+  blackListRefreshToken,
+  isBlackListed,
+};

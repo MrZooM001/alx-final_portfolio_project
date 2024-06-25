@@ -31,8 +31,11 @@ router.post('/users/register', UserController.registerUser);
 // Login a user
 router.post('/auth/login', AuthController.loginUser);
 
+// Refresh a user token
+// router.post('/auth/refresh-token', AuthController.refreshToken);
+
 // Logout a user
-router.post('/auth/logout', AuthController.logoutUser);
+router.delete('/auth/logout', AuthController.logoutUser);
 //#endregion
 
 export default router;
