@@ -12,42 +12,34 @@ class AuthController {
       if (!user) return res.status(401).json({ error: 'Email not found' });
 
       const isMatched = await user.isMatchedPassword(validation.password);
-      // ############### Debug ############## 
-      console.log(isMatched);
-      // #################################### 
+
       if (!isMatched) return res.status(401).json({ error: 'Invalid Email or password' });
 
       const accessToken = await signAccessToken(user);
-      // ############### Debug ############## 
-      console.log(accessToken);
-      // #################################### 
       const refreshToken = await signRefreshToken(user);
-      // ############### Debug ############## 
-      console.log('refreshToken\t', refreshToken);
-      // #################################### 
       res.status(200).json({ accessToken, refreshToken });
     } catch (err) {
       res.status(400).json({ error: err.message });
     }
   }
 
-  static async logoutUser(req, res) {
+  static async logoutUser(req, res, next) {
     try {
       const { refreshToken } = req.body;
-      if (!refreshToken) {
-        return res.status(401).json({ error: 'Unauthorized, Bad Request' });
-      }
+      //########### Debug ###########
+      console.log('1- refreshToken:', refreshToken);
+      // ###########################
+      if (!refreshToken) return res.status(400).json({ error: 'Refresh token is required' });
 
       const userId = await verifyRefreshToken(refreshToken);
-      if (!userId) {
-        return res.status(401).json({ error: 'Unauthorized, Bad Request' });
-      }
+      //########### Debug ###########
+      console.log('2- userId:', userId);
+      // ###########################
+      await redisClient.del(userId.toString());
 
-      await redisClient.del(userId);
-      res.status(204).json({ message: 'Logged out successfully' });
+      res.status(200).json({ message: 'Logout successful' });
     } catch (err) {
-      console.error('Error during logout:', err.message);
-      return res.status(500).json({ error: err.message });
+      next(err);
     }
   }
 }

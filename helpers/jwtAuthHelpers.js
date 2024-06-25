@@ -48,32 +48,26 @@ const verifyAccessToken = (req, res, next) => {
 };
 
 const signRefreshToken = (user) => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const payload = {};
     const options = {
-      expiresIn: '24h',
+      expiresIn: '1y',
       issuer: 'InnovativeLearningPlatform',
       audience: user._id.toString(),
     };
 
-    JWT.sign(payload, env.REFRESH_TOKEN_SECRET, options, async (err, token) => {
+    JWT.sign(payload, env.REFRESH_TOKEN_SECRET, options, (err, token) => {
       if (err) {
         console.error('Error signing refresh token:', err.message);
         return reject(err);
       }
 
       try {
-        console.log('Setting token in Redis...');
-        const result = await redisClient.set(user._id.toString(), token, 24 * 60 * 60);
-        if (result) {
-          console.log('Token successfully set in Redis');
-          resolve(token);
-        } else {
-          throw new Error('Failed to set token in Redis');
-        }
+        redisClient.set(user._id.toString(), token, 365 * 24 * 60 * 60);
+        resolve(token);
       } catch (redisErr) {
         console.error('Redis error:', redisErr.message);
-        return reject(redisErr);
+        reject(redisErr);
       }
     });
   });
@@ -81,22 +75,21 @@ const signRefreshToken = (user) => {
 
 const verifyRefreshToken = (refreshToken) => {
   return new Promise((resolve, reject) => {
-    JWT.verify(refreshToken, env.REFRESH_TOKEN_SECRET, async (err, payload) => {
+    JWT.verify(refreshToken, env.REFRESH_TOKEN_SECRET, (err, payload) => {
       if (err) return reject(err);
 
       const userId = payload.aud;
-
-      try {
-        const result = await redisClient.get(userId);
-        if (refreshToken === result) {
-          resolve(userId)
-        } else {
+      redisClient.get(userId, (err, result) => {
+        if (err) {
+          console.error('Redis error:', err.message);
           reject(err);
+          return;
         }
-      } catch (redisErr) {
-        console.error('Redis error:', redisErr.message);
-        return reject(redisErr);
-      }
+        if (refreshToken === result) {
+          return resolve(userId);
+        }
+        reject(err);
+      });
     });
   });
 };

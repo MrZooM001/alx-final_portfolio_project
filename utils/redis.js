@@ -67,7 +67,7 @@ class RedisClient {
           reject(err);
           return;
         }
-        resolve(result);
+        return resolve(result);
       });
     });
   }
@@ -109,7 +109,7 @@ class RedisClient {
           reject(err);
           return;
         }
-        resolve(true);
+        return resolve(true);
       });
     });
   }

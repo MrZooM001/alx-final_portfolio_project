@@ -32,7 +32,7 @@ router.post('/users/register', UserController.registerUser);
 router.post('/auth/login', AuthController.loginUser);
 
 // Logout a user
-router.post('/auth/logout', AuthController.logoutUser);
+router.delete('/auth/logout', AuthController.logoutUser);
 //#endregion
 
 export default router;
