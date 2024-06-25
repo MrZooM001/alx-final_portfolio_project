@@ -1,6 +1,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import router from './routes/router_index.js';
+import appRouter from './routes/appRoutes.js';
+import authRouter from './routes/authRoutes.js';
+import usersRouter from './routes/userRoutes.js';
 
 dotenv.config();
 
@@ -10,7 +12,9 @@ app.use(express.urlencoded({ extended: true }));
 
 const API_PORT = process.env.API_PORT || 5000;
 
-app.use('/', router);
+app.use('/', appRouter);
+app.use('/auth/', authRouter);
+app.use('/users/', usersRouter);
 
 app.listen(API_PORT, () => {
   console.log(`Innovative Learning Platform API server is listening on http://localhost:/${API_PORT}`);

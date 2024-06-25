@@ -81,7 +81,7 @@ const signRefreshToken = (user) => {
       }
 
       try {
-        const result = await redisClient.set(user._id.toString(), token, 24 * 60 * 60);
+        const result = await redisClient.set(`user:${user._id.toString()}`, token, 24 * 60 * 60);
         if (result) {
           resolve(token);
         } else {
@@ -108,7 +108,7 @@ const verifyRefreshToken = (refreshToken) => {
           return reject(new Error('Invalid refresh token'));
         }
 
-        const result = await redisClient.get(userId);
+        const result = await redisClient.get(`user:${userId}`);
         if (refreshToken === result) {
           resolve(userId)
         } else {

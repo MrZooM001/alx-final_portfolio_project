@@ -1,6 +1,8 @@
 import { validateUserSchema, validateCourseSchema } from '../helpers/schemaValidationHelpers.js';
 import { signAccessToken, verifyAccessToken, signRefreshToken, verifyRefreshToken } from '../helpers/jwtAuthHelpers.js';
 import userModel from '../models/UserModel.js';
+import { getActiveSessions } from '../helpers/sessionHelpers.js';
+
 
 class UsersController {
   static async registerUser(req, res) {
@@ -28,6 +30,15 @@ class UsersController {
       res.status(201).json({ accessToken, refreshToken });
     } catch (err) {
       return res.status(400).json({ error: err.message });
+    }
+  }
+
+  static async getActiveUsers(req, res) {
+    try {
+      const activeUsers = await getActiveSessions();
+      res.status(200).json({ activeUsers });
+    } catch (err) {
+      return res.status(400).json({ error: `Failed to retrieve active users, ${err.message}` });
     }
   }
 }

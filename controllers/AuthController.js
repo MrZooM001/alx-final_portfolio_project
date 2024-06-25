@@ -36,7 +36,7 @@ class AuthController {
         return res.status(401).json({ error: 'Unauthorized, Bad Request' });
       }
 
-      await redisClient.del(userId);
+      await redisClient.del(`user:${userId}`);
 
       await blackListRefreshToken(refreshToken);
 
