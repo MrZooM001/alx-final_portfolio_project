@@ -13,9 +13,16 @@ const validateCourseSchema = Joi.object({
   title: Joi.string().required().lowercase().trim().min(6),
   description: Joi.string().required(),
   instructor: Joi.string().required(),
-  contents: Joi.any(),
+  contents: Joi.array(),
   category: Joi.string().required(),
   isPublic: Joi.boolean().default(false),
 });
 
-export { validateUserSchema, validateCourseSchema };
+const validateContentSchema = Joi.object({
+  title: Joi.string().required().lowercase().trim().min(6),
+  type: Joi.string().required().valid('video', 'article', 'image', 'audio', 'quiz').default('article'),
+  data: Joi.any(),
+  isPublic: Joi.boolean().default(false),
+});
+
+export { validateUserSchema, validateCourseSchema, validateContentSchema };

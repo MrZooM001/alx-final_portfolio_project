@@ -5,6 +5,7 @@ const contentSchema = new Schema({
   title: { type: String, required: true, lowercase: true, trim: true },
   type: { type: String, required: true, enum: ['video', 'article', 'image', 'audio', 'quiz'] },
   data: { type: Schema.Types.Mixed, required: true },
+  isPublic: { type: Schema.Types.Boolean, default: false },
 }, { timestamps: true });
 
 const CourseContent = model('content', contentSchema);
