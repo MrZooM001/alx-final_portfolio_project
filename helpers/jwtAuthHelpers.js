@@ -29,24 +29,6 @@ const signAccessToken = (user) => {
   });
 };
 
-const verifyAccessToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  if (!authHeader) {
-    return res.status(401).json({ error: 'Unauthorized, Bad Request' });
-  }
-
-  const token = authHeader.split(' ')[1];
-
-  JWT.verify(token, env.ACCESS_TOKEN_SECRET, (err, payload) => {
-    if (err) {
-      const message = err.name === 'JsonWebTokenError' ? 'Unauthorized' : err.message;
-      return next(res.status(401).json({ error: message }));
-    }
-    req.user = payload;
-    next();
-  });
-};
-
 const blackListRefreshToken = async (token) => {
   const payload = JWT.decode(token);
   if (!payload) throw new Error('Invalid Token');
@@ -124,7 +106,6 @@ const verifyRefreshToken = (refreshToken) => {
 
 export {
   signAccessToken,
-  verifyAccessToken,
   signRefreshToken,
   verifyRefreshToken,
   blackListRefreshToken,

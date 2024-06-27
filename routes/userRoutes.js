@@ -1,5 +1,6 @@
 import express from 'express';
 import UsersController from '../controllers/UsersController.js';
+import { verifyAccessToken } from '../middlewares/verifyAccessTokenMiddleware.js';
 
 const usersRouter = express.Router();
 
@@ -8,7 +9,7 @@ const usersRouter = express.Router();
 usersRouter.post('/register', UsersController.registerUser);
 
 // get active users count as statistics from Redis cache
-usersRouter.get('/active-users', UsersController.getActiveUsers);
+usersRouter.get('/active-users', verifyAccessToken, UsersController.getActiveUsers);
 //#endregion
 
 export default usersRouter;

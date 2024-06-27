@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import appRouter from './routes/appRoutes.js';
 import authRouter from './routes/authRoutes.js';
 import usersRouter from './routes/userRoutes.js';
+import courseRouter from './routes/courseRoutes.js';
 
 dotenv.config();
 
@@ -15,12 +16,14 @@ const API_PORT = process.env.API_PORT || 5000;
 app.use('/', appRouter);
 app.use('/auth/', authRouter);
 app.use('/users/', usersRouter);
+app.use('/courses/', courseRouter);
 
 app.listen(API_PORT, () => {
   console.log(`
     \t◤⁗‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷◥
     \t|    Innovative Learning Platform API    |
-    \t|       Learning Management System       |
+    \t|    ————————————————————————————————    |
+    \t|     » Learning Management System «     |
     \t◣…………………………………………………………………………………………………………◢
-\nServer is listening on http://localhost:/${API_PORT}\n`);
+\nServer is listening on http://localhost:${API_PORT}\n`);
 });

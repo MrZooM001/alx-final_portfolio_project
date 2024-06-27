@@ -1,5 +1,5 @@
-import { validateUserSchema, validateCourseSchema } from '../helpers/schemaValidationHelpers.js';
-import { signAccessToken, verifyAccessToken, signRefreshToken, verifyRefreshToken } from '../helpers/jwtAuthHelpers.js';
+import { validateUserSchema } from '../helpers/schemaValidationHelpers.js';
+import { signAccessToken, signRefreshToken } from '../helpers/jwtAuthHelpers.js';
 import userModel from '../models/UserModel.js';
 import { getActiveSessions } from '../helpers/sessionHelpers.js';
 
