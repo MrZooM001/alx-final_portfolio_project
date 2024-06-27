@@ -13,7 +13,7 @@ const validateCourseSchema = Joi.object({
   title: Joi.string().required().lowercase().trim().min(6),
   description: Joi.string().required(),
   instructor: Joi.string().required(),
-  content: Joi.string(),
+  contents: Joi.any(),
   category: Joi.string().required(),
   isPublic: Joi.boolean().default(false),
 });

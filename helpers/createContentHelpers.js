@@ -1,21 +1,22 @@
 import contentModel from '../models/ContentModel.js';
 
 const createContentItems = async (courseId, contents) => {
-  const contentItems = [];
+  if (!Array.isArray(contents)) throw new Error('Contents should be an array');
 
-  for (const content of contents) {
-    const newContent = new contentModel({
+  try {
+    const contentItems = contents.map(content => new contentModel({
       course: courseId,
       title: content.title,
       type: content.type,
       data: content.data,
-    });
+    }));
 
-    const savedContent = await newContent.save();
-    contentItems.push(savedContent._id);
+    const savedContents = await contentModel.insertMany(contentItems);
+    return savedContents.map(content => content._id);
+  } catch (err) {
+    console.error('Error creating content items:', err.message);
+    throw err;
   }
-
-  return contentItems;
 }
 
 export { createContentItems };
