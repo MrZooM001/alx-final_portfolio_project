@@ -1,6 +1,8 @@
 import { format } from 'date-fns';
 import { validateCourseSchema } from '../helpers/schemaValidationHelpers.js';
-import { createContentItems } from '../helpers/createContentHelpers.js'
+import { createContentItems } from '../helpers/createContentHelpers.js';
+import { updateContentHelper } from '../helpers/updateContentHelper.js';
+import { archiveCourseHelper } from '../helpers/archiveCourseHelper.js';
 import courseModel from '../models/CourseModel.js';
 import contentModel from '../models/ContentModel.js';
 import categoryModel from '../models/CategoryModel.js';
@@ -10,7 +12,7 @@ class CourseController {
     try {
       const userRole = req.user.role;
       if (!['instructor', 'admin'].includes(userRole)) {
-        return res.status(401).json({ error: 'You need to be a teacher to create a course!' });
+        return res.status(401).json({ error: 'Only instructors can create a course!' });
       }
 
       req.body.instructor = req.user.userId;
@@ -62,18 +64,27 @@ class CourseController {
 
   static async getAllCourses(req, res) {
     try {
-      const courses = await courseModel.find({}).populate('category').populate('instructor');
+      const courses = await courseModel.find({})
+        .populate('category')
+        .populate('instructor');
 
-      const response = courses.filter(course => course.isPublic === false)
-        .map(course => ({
-          title: course.title,
-          description: course.description,
-          category: course.category.name,
-          createdBy: `${course.instructor.firstName} ${course.instructor.lastName}`,
-          //publishedOn: format(new Date(course.createdAt), 'd-M-yyyy'),
-          lastUpdatedOn: format(new Date(course.updatedAt), 'd-M-yyyy'),
-          //isPublic: course.isPublic
-        }));
+      if (!courses) return res.status(404).json({ error: 'Course not found' });
+
+      const response = await Promise.all(
+        courses.filter(course => course.isPublic === false)
+          .map(async course => {
+            const contentCount = await contentModel.countDocuments({ course: course._id });
+            return {
+              _id: course._id,
+              title: course.title,
+              description: course.description,
+              category: course.category.name,
+              instructor: `${course.instructor.firstName} ${course.instructor.lastName}`,
+              contents: contentCount,
+              publishedOn: format(new Date(course.createdAt), 'd-M-yyyy'),
+              lastUpdatedOn: format(new Date(course.updatedAt), 'd-M-yyyy'),
+            }
+          }));
 
       res.status(200).json(response);
     } catch (err) {
@@ -131,18 +142,96 @@ class CourseController {
       }
 
       const courseId = req.params.courseId;
-      const updatedCourse = req.body;
+      const currentCourse = await courseModel.findById(courseId);
+      if (!currentCourse) return res.status(404).json({ error: 'Course not found' });
 
-      const course = await courseModel.findByIdAndUpdate(courseId, updatedCourse, { new: true }).populate('contents');
+      if (req.user.userId !== currentCourse.instructor.toString()) {
+        return res.status(403).json({ error: 'This is not your course to update!' });
+      }
+
+      const { title, description, category, contents } = req.body;
+
+      const catFromReq = await categoryModel.findOne({ name: category });
+      let categoryId;
+
+      if (!catFromReq) {
+        const newCategory = new categoryModel({
+          name: newCategory
+        });
+        const savedCategory = await newCategory.save();
+        categoryId = savedCategory._id.toString();
+      } else {
+        categoryId = catFromReq._id.toString();
+      }
+
+      const course = await courseModel
+        .findByIdAndUpdate(courseId,
+          {
+            $set: { title, description, category: categoryId }
+          },
+          { new: true }).populate('contents').populate('category').populate('instructor');
 
       if (!course) return res.status(404).json({ error: 'Course not found' });
 
-      return res.status(200).json({ success: true, course });
+      const updatedContents = await updateContentHelper(courseId, contents);
+
+      course.contents = updatedContents.map(content => content._id);
+      await course.save();
+
+      const response = {
+        title: course.title,
+        description: course.description,
+        category: course.category.name,
+        createdBy: `${course.instructor.firstName} ${course.instructor.lastName}`,
+        publishedOn: format(new Date(course.createdAt), 'd-M-yyyy'),
+        lastUpdatedOn: format(new Date(course.updatedAt), 'd-M-yyyy'),
+        contents: updatedContents.map(content => ({
+          title: content.title,
+          type: content.type,
+          isPublic: content.isPublic,
+          data: content.data,
+        })),
+      };
+
+      res.status(200).json({ success: true, updatedCourse: response });
     } catch (err) {
       console.error('Error updating course:', err.message);
       return res.status(500).json({ error: err.message });
     }
   }
+
+  static async deleteCourse(req, res) {
+    try {
+      const userRole = req.user.role;
+      if (!['instructor', 'admin'].includes(userRole)) {
+        return res.status(401).json({ error: 'You need to be a teacher to delete a course!' });
+      }
+
+      const courseId = req.params.courseId;
+      const currentCourse = await courseModel.findById(courseId);
+      if (!currentCourse) return res.status(404).json({ error: 'Course not found' });
+
+      if (req.user.userId !== currentCourse.instructor.toString()) {
+        return res.status(403).json({ error: 'This is not your course to delete!' });
+      }
+
+      const archiveCourse = await archiveCourseHelper(courseId);
+      if (!archiveCourse) return res.status(500).json({ error: 'Course not deleted' });
+
+      await contentModel.deleteMany({ course: courseId });
+      await courseModel.findByIdAndDelete(courseId);
+
+      res.status(200).json({ message: "Course deleted successfuly" });
+    } catch (err) {
+      console.error('Error deleting course:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  static async restoreCourse(req, res) {
+
+  }
+
 
 }
 
