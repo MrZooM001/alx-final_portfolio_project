@@ -14,7 +14,7 @@ const archiveCourseHelper = async (courseId) => {
       description: course.description,
       instructor: course.instructor,
       category: course.category,
-      contents: course.contents.map(content => content._id),
+      contents: [],
       createdAt: course.createdAt,
       updatedAt: course.updatedAt,
       archivedAt: Date.now(),
@@ -22,20 +22,30 @@ const archiveCourseHelper = async (courseId) => {
 
     await archivedCourse.save();
 
-    if (course.contents.length > 0) {
-      const archivedContent = course.contents.map(content => new archivedContentModel({
-        _id: content._id,
-        course: content.course,
-        title: content.title,
-        type: content.type,
-        data: content.data,
-        isPublic: content.isPublic,
-        createdAt: content.createdAt,
-        updatedAt: Date.now(),
+    const archivedContents = await Promise.all(
+      course.contents.map(async content => {
+        const contents = new archivedContentModel({
+          course: content.course,
+          title: content.title,
+          type: content.type,
+          data: content.data,
+          isPublic: content.isPublic,
+          createdAt: content.createdAt,
+          updatedAt: content.updatedAt,
+        });
+        return await contents.save();
       }));
 
-      await archivedContentModel.insertMany(archivedContent);
-    }
+    console.log('############### Debug #################')
+    console.log('Archived contents:', archivedContents);
+    console.log('############### Debug #################')
+
+    archivedCourse.contents = archivedContents.map(content => content._id);
+    await archivedCourse.save();
+
+    console.log('############### Debug #################')
+    console.log('Archived course:', archivedCourse);
+    console.log('############### Debug #################')
 
     return archivedCourse;
   } catch (err) {

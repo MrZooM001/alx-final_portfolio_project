@@ -5,7 +5,7 @@ const archivedCourseSchema = new Schema({
   description: { type: String, required: true, trim: true },
   instructor: { type: Schema.Types.ObjectId, required: true, ref: 'user' },
   category: { type: Schema.Types.ObjectId, required: true, ref: 'category' },
-  contents: [{ type: Schema.Types.ObjectId, ref: 'content' }],
+  contents: [{ type: Schema.Types.ObjectId, ref: 'archivedContent' }],
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, default: new Date},
   archivedAt: { type: Date, default: new Date},

@@ -9,8 +9,8 @@ const addContentToCourseHelper = async (courseId, contentData) => {
       title: validation.title, course: courseId
     });
 
-    if (contentExists) {
-      return res.status(400).json({
+    if (contentExists.title === validation.title) {
+      return res.status(409).json({
         error: 'Content with the same title already exists in this course'
       });
     }

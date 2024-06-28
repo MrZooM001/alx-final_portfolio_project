@@ -3,9 +3,12 @@ import { validateCourseSchema } from '../helpers/schemaValidationHelpers.js';
 import { createContentItems } from '../helpers/createContentHelpers.js';
 import { updateContentHelper } from '../helpers/updateContentHelper.js';
 import { archiveCourseHelper } from '../helpers/archiveCourseHelper.js';
+import { restoreCourseHelper } from '../helpers/restoreCourseHelper.js';
 import courseModel from '../models/CourseModel.js';
 import contentModel from '../models/ContentModel.js';
 import categoryModel from '../models/CategoryModel.js';
+import archivedCourseModel from '../models/ArchivedCourseModel.js';
+import archivedContentModel from '../models/ArchivedContentModel.js';
 
 class CourseController {
   static async createCourse(req, res) {
@@ -155,9 +158,7 @@ class CourseController {
       let categoryId;
 
       if (!catFromReq) {
-        const newCategory = new categoryModel({
-          name: newCategory
-        });
+        const newCategory = new categoryModel({ name: category });
         const savedCategory = await newCategory.save();
         categoryId = savedCategory._id.toString();
       } else {
@@ -229,9 +230,31 @@ class CourseController {
   }
 
   static async restoreCourse(req, res) {
+    try {
+      const userRole = req.user.role;
+      if (!['instructor', 'admin'].includes(userRole)) {
+        return res.status(401).json({ error: 'You need to be a teacher to delete a course!' });
+      }
 
+      const courseId = req.params.courseId;
+      const currentCourse = await archivedCourseModel.findById(courseId);
+
+      if (!currentCourse || req.user.userId !== currentCourse.instructor.toString()) {
+        return res.status(404).json({ error: 'Course not found' });
+      }
+
+      const restoredCourse = await restoreCourseHelper(courseId);
+      if (!restoredCourse) return res.status(500).json({ error: 'Course not restored' });
+
+      await archivedContentModel.deleteMany({ course: courseId });
+      await archivedCourseModel.findByIdAndDelete(courseId);
+
+      res.status(200).json({ message: "Course restored successfuly" });
+    } catch (err) {
+      console.error('Error restoring course:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
   }
-
 
 }
 

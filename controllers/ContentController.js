@@ -13,6 +13,7 @@ class ContentController {
 
       const courseId = req.params.courseId;
       const savedContent = await addContentToCourseHelper(courseId, req.body)
+
       return res.status(200).json({ success: true, savedContent });
     } catch (err) {
       console.error('Error creating content:', err.message);
