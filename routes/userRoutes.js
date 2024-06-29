@@ -8,6 +8,10 @@ const usersRouter = express.Router();
 // Register a new user
 usersRouter.post('/register', UsersController.registerUser);
 
+usersRouter.post('/update', verifyAccessToken, UsersController.updateUser);
+
+usersRouter.post('/update-password', verifyAccessToken, UsersController.updatePassword);
+
 // get active users count as statistics from Redis cache
 usersRouter.get('/active-users', verifyAccessToken, UsersController.getActiveUsers);
 //#endregion

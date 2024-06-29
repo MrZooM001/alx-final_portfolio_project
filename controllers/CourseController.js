@@ -296,7 +296,7 @@ class CourseController {
         .populate('category')
         .populate('instructor');
 
-      if (!archivedCourses) return res.status(404).json({ error: 'Course not found in the archive' });
+      if (!archivedCourses) return res.status(404).json({ error: 'No archived courses found' });
 
       const response = await Promise.all(
         archivedCourses.map(async course => {
@@ -331,39 +331,33 @@ class CourseController {
       const courseId = req.params.courseId;
       const userId = req.user.userId;
 
-      console.log('################ DEBUG ################')
-      console.log('userId', userId);
-      console.log('################ End DEBUG ################')
-
       const archivedCourse = await archivedCourseModel.find({ _id: courseId, instructor: userId })
         .populate('category')
         .populate('instructor')
         .populate('contents');
 
-
       if (!archivedCourse || archivedCourse.length === 0) return res.status(404).json({ error: 'Course not found' });
-      res.status(200).json(archivedCourse); // as break point for debugging
 
-      // const contents = await contentModel.find({ course: courseId });
+      const contents = await contentModel.find({ course: courseId });
 
-      // const response = {
-      //   _id: archivedCourse._id,
-      //   title: archivedCourse.title,
-      //   description: archivedCourse.description,
-      //   category: archivedCourse.category.name,
-      //   instructor: `${archivedCourse.instructor.firstName} ${archivedCourse.instructor.lastName}`,
-      //   createdAt: format(new Date(archivedCourse.createdAt), 'd-M-yyyy'),
-      //   updatedAt: format(new Date(archivedCourse.updatedAt), 'd-M-yyyy'),
-      //   isPublic: archivedCourse.isPublic,
-      //   contents: contents.map(content => ({
-      //     title: content.title,
-      //     type: content.type,
-      //     isPublic: content.isPublic,
-      //     data: content.data,
-      //   })),
-      // };
+      const response = {
+        _id: archivedCourse._id,
+        title: archivedCourse.title,
+        description: archivedCourse.description,
+        category: archivedCourse.category.name,
+        instructor: `${archivedCourse.instructor.firstName} ${archivedCourse.instructor.lastName}`,
+        createdAt: format(new Date(archivedCourse.createdAt), 'd-M-yyyy'),
+        updatedAt: format(new Date(archivedCourse.updatedAt), 'd-M-yyyy'),
+        isPublic: archivedCourse.isPublic,
+        contents: contents.map(content => ({
+          title: content.title,
+          type: content.type,
+          isPublic: content.isPublic,
+          data: content.data,
+        })),
+      };
 
-      // res.status(200).json(response);
+      res.status(200).json(response);
     } catch (err) {
       console.error('Error fetching courses:', err.message);
       return res.status(500).json({ error: err.message });

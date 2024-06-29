@@ -15,6 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
 const API_PORT = process.env.API_PORT || 5000;
+const API_HOST = process.env.API_HOST || 'localhost';
 
 app.use('/', appRouter);
 app.use('/auth/', authRouter);
@@ -29,5 +30,5 @@ app.listen(API_PORT, () => {
     \t|    ————————————————————————————————    |
     \t|     » Learning Management System «     |
     \t◣…………………………………………………………………………………………………………◢
-\nServer is listening on http://localhost:${API_PORT}\n`);
+\nNodeJS Server is listening on http://${API_HOST}:${API_PORT}/\n`);
 });

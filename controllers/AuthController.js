@@ -1,12 +1,12 @@
 import { signAccessToken, signRefreshToken, verifyRefreshToken, blackListRefreshToken } from '../helpers/jwtAuthHelpers.js';
-import { validateUserSchema } from '../helpers/schemaValidationHelpers.js';
+import { validateLoginUserSchema } from '../helpers/schemaValidationHelpers.js';
 import userModel from '../models/UserModel.js';
 import redisClient from '../utils/redis.js';
 
 class AuthController {
   static async loginUser(req, res, next) {
     try {
-      const validation = await validateUserSchema.validateAsync(req.body);
+      const validation = await validateLoginUserSchema.validateAsync(req.body);
 
       const user = await userModel.findOne({ email: validation.email });
       if (!user) return res.status(401).json({ error: 'Email not found' });
@@ -47,6 +47,7 @@ class AuthController {
       return res.status(500).json({ error: err.message });
     }
   }
+
 }
 
 export default AuthController;

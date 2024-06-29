@@ -1,12 +1,30 @@
 import Joi from 'joi';
+import JoiDate from '@joi/date';
 
-const validateUserSchema = Joi.object({
+const extendedJoi = Joi.extend(JoiDate);
+
+const validateRegisterUserSchema = Joi.object({
   email: Joi.string().email().required().lowercase().trim(),
   password: Joi.string().min(6).required(),
   firstName: Joi.string().trim(),
   lastName: Joi.string().trim(),
-  dateOfBirth: Joi.date().greater('1-1-1934').less('now'),
-  role: Joi.string().lowercase().valid('student', 'instructor', 'admin').default('student'),
+  dateOfBirth: extendedJoi.date().format('D-M-YYYY').required().greater('1-1-1934').less('now').utc(),
+  role: Joi.string().lowercase().valid('student', 'instructor').default('student'),
+});
+
+const validateLoginUserSchema = Joi.object({
+  email: Joi.string().email().required().lowercase().trim(),
+  password: Joi.string().min(6).required(),
+});
+
+const validateUpdatePasswordSchema = Joi.object({
+  currentPassword: Joi.string().min(6).required(),
+  newPassword: Joi.string().min(6).required(),
+});
+
+const validateUpdateUserSchema = Joi.object({
+  firstName: Joi.string().trim(),
+  lastName: Joi.string().trim(),
 });
 
 const validateCourseSchema = Joi.object({
@@ -25,4 +43,11 @@ const validateContentSchema = Joi.object({
   isPublic: Joi.boolean().default(false),
 });
 
-export { validateUserSchema, validateCourseSchema, validateContentSchema };
+export {
+  validateRegisterUserSchema,
+  validateUpdateUserSchema,
+  validateUpdatePasswordSchema,
+  validateCourseSchema,
+  validateContentSchema,
+  validateLoginUserSchema
+};
