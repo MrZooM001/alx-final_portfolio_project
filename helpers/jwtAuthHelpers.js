@@ -8,7 +8,7 @@ dotenv.config();
 const signAccessToken = (user) => {
   return new Promise((resolve, reject) => {
     const payload = {
-      userId: user._id,
+      _id: user._id,
       email: user.email,
       role: user.role
     };

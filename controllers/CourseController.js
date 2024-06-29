@@ -18,7 +18,7 @@ class CourseController {
         return res.status(401).json({ error: 'Only instructors can create a course!' });
       }
 
-      req.body.instructor = req.user.userId;
+      req.body.instructor = req.user._id;
 
       const validation = await validateCourseSchema.validateAsync(req.body);
 
@@ -149,7 +149,7 @@ class CourseController {
       const currentCourse = await courseModel.findById(courseId);
       if (!currentCourse) return res.status(404).json({ error: 'Course not found' });
 
-      if (req.user.userId !== currentCourse.instructor.toString()) {
+      if (req.user._id !== currentCourse.instructor.toString()) {
         return res.status(403).json({ error: 'This is not your course to update!' });
       }
 
@@ -213,7 +213,7 @@ class CourseController {
       const currentCourse = await courseModel.findById(courseId);
       if (!currentCourse) return res.status(404).json({ error: 'Course not found' });
 
-      if (req.user.userId !== currentCourse.instructor.toString()) {
+      if (req.user._id !== currentCourse.instructor.toString()) {
         return res.status(403).json({ error: 'This is not your course to delete!' });
       }
 
@@ -240,7 +240,7 @@ class CourseController {
       const courseId = req.params.courseId;
       const currentCourse = await archivedCourseModel.findById(courseId);
 
-      if (!currentCourse || req.user.userId !== currentCourse.instructor.toString()) {
+      if (!currentCourse || req.user._id !== currentCourse.instructor.toString()) {
         return res.status(404).json({ error: 'Course not found' });
       }
 
@@ -268,7 +268,7 @@ class CourseController {
       const currentCourse = await courseModel.findById(courseId);
       if (!currentCourse) return res.status(404).json({ error: 'Course not found' });
 
-      if (req.user.userId !== currentCourse.instructor.toString()) {
+      if (req.user._id !== currentCourse.instructor.toString()) {
         return res.status(403).json({ error: 'This is not your course to delete!' });
       }
 
@@ -290,7 +290,7 @@ class CourseController {
         return res.status(401).json({ error: 'You need to be a teacher to update a course!' });
       }
 
-      const userId = req.user.userId;
+      const userId = req.user._id;
 
       const archivedCourses = await archivedCourseModel.find({ instructor: userId })
         .populate('category')
@@ -329,7 +329,7 @@ class CourseController {
       }
 
       const courseId = req.params.courseId;
-      const userId = req.user.userId;
+      const userId = req.user._id;
 
       const archivedCourse = await archivedCourseModel.find({ _id: courseId, instructor: userId })
         .populate('category')

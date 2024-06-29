@@ -1,6 +1,7 @@
 import express from 'express';
 import CourseController from '../controllers/CourseController.js';
 import ContentController from '../controllers/ContentController.js';
+import EnrollmentController from '../controllers/EnrollmentController.js';
 import { verifyAccessToken } from '../middlewares/verifyAccessTokenMiddleware.js';
 
 const courseRouter = express.Router();
@@ -20,6 +21,8 @@ courseRouter.post('/:courseId/add-content', verifyAccessToken, ContentController
 courseRouter.delete('/:courseId/full-delete', verifyAccessToken, CourseController.fullDeleteCourse);
 
 courseRouter.delete('/:courseId/delete', verifyAccessToken, CourseController.deleteCourse);
+
+courseRouter.post('/:courseId/enroll', verifyAccessToken, EnrollmentController.enrollUserToCourse);
 
 //#endregion
 

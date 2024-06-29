@@ -45,7 +45,7 @@ class UsersController {
 
   static async updateUser(req, res) {
     try {
-      const userId = req.user.userId;
+      const userId = req.user._id;
 
       const validation = await validateUpdateUserSchema.validateAsync(req.body);
 
@@ -64,7 +64,7 @@ class UsersController {
 
   static async updatePassword(req, res) {
     try {
-      const userId = req.user.userId;
+      const userId = req.user._id;
 
       const user = await userModel.findById(userId);
       if (!user) return res.status(404).json({ error: 'User not found' });
