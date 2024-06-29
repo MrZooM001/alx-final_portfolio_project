@@ -5,6 +5,7 @@ import appRouter from './routes/appRoutes.js';
 import authRouter from './routes/authRoutes.js';
 import usersRouter from './routes/userRoutes.js';
 import courseRouter from './routes/courseRoutes.js';
+import archiveRouter from './routes/archiveRoutes.js';
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use('/', appRouter);
 app.use('/auth/', authRouter);
 app.use('/users/', usersRouter);
 app.use('/courses/', courseRouter);
+app.use('/archive/', archiveRouter);
 
 app.listen(API_PORT, () => {
   console.log(`

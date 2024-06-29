@@ -84,8 +84,8 @@ class CourseController {
               category: course.category.name,
               instructor: `${course.instructor.firstName} ${course.instructor.lastName}`,
               contents: contentCount,
-              publishedOn: format(new Date(course.createdAt), 'd-M-yyyy'),
-              lastUpdatedOn: format(new Date(course.updatedAt), 'd-M-yyyy'),
+              createdAt: format(new Date(course.createdAt), 'd-M-yyyy'),
+              updatedAt: format(new Date(course.updatedAt), 'd-M-yyyy'),
             }
           }));
 
@@ -115,13 +115,14 @@ class CourseController {
       const contents = await contentModel.find({ course: courseId });
 
       const response = {
+        _id: course._id,
         title: course.title,
         description: course.description,
         category: course.category.name,
-        createdBy: `${course.instructor.firstName} ${course.instructor.lastName}`,
-        //publishedOn: format(new Date(course.createdAt), 'd-M-yyyy'),
-        lastUpdatedOn: format(new Date(course.updatedAt), 'd-M-yyyy'),
-        //isPublic: course.isPublic
+        instructor: `${course.instructor.firstName} ${course.instructor.lastName}`,
+        createdAt: format(new Date(course.createdAt), 'd-M-yyyy'),
+        updatedAt: format(new Date(course.updatedAt), 'd-M-yyyy'),
+        isPublic: course.isPublic,
         contents: contents.map(content => ({
           title: content.title,
           type: content.type,
@@ -255,6 +256,120 @@ class CourseController {
       return res.status(500).json({ error: err.message });
     }
   }
+
+  static async fullDeleteCourse(req, res) {
+    try {
+      const userRole = req.user.role;
+      if (!['instructor', 'admin'].includes(userRole)) {
+        return res.status(401).json({ error: 'You need to be a teacher to delete a course!' });
+      }
+
+      const courseId = req.params.courseId;
+      const currentCourse = await courseModel.findById(courseId);
+      if (!currentCourse) return res.status(404).json({ error: 'Course not found' });
+
+      if (req.user.userId !== currentCourse.instructor.toString()) {
+        return res.status(403).json({ error: 'This is not your course to delete!' });
+      }
+
+      await contentModel.deleteMany({ course: courseId });
+      await courseModel.findByIdAndDelete(courseId);
+
+      res.status(200).json({ message: "Course deleted successfuly" });
+    } catch (err) {
+      console.error('Error deleting course:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  static async getAllArchivedCourses(req, res) {
+    try {
+      const userRole = req.user.role;
+
+      if (!['instructor', 'admin'].includes(userRole)) {
+        return res.status(401).json({ error: 'You need to be a teacher to update a course!' });
+      }
+
+      const userId = req.user.userId;
+
+      const archivedCourses = await archivedCourseModel.find({ instructor: userId })
+        .populate('category')
+        .populate('instructor');
+
+      if (!archivedCourses) return res.status(404).json({ error: 'Course not found in the archive' });
+
+      const response = await Promise.all(
+        archivedCourses.map(async course => {
+          const archivedContentsCount = await archivedContentModel.countDocuments({ course: course._id });
+          return {
+            _id: course._id,
+            title: course.title,
+            description: course.description,
+            category: course.category.name,
+            instructor: `${course.instructor.firstName} ${course.instructor.lastName}`,
+            contents: archivedContentsCount,
+            createdAt: format(new Date(course.createdAt), 'd-M-yyyy'),
+            updatedAt: format(new Date(course.updatedAt), 'd-M-yyyy'),
+            archivedAt: format(new Date(course.archivedAt), 'd-M-yyyy'),
+          }
+        }));
+
+      res.status(200).json({ archivedCourses: response });
+    } catch (err) {
+      console.error('Error fetching archived courses:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  static async getArchivedCourseById(req, res) {
+    try {
+      const userRole = req.user.role;
+      if (!['instructor', 'admin'].includes(userRole)) {
+        return res.status(401).json({ error: 'You need to be a teacher to update a course!' });
+      }
+
+      const courseId = req.params.courseId;
+      const userId = req.user.userId;
+
+      console.log('################ DEBUG ################')
+      console.log('userId', userId);
+      console.log('################ End DEBUG ################')
+
+      const archivedCourse = await archivedCourseModel.find({ _id: courseId, instructor: userId })
+        .populate('category')
+        .populate('instructor')
+        .populate('contents');
+
+
+      if (!archivedCourse || archivedCourse.length === 0) return res.status(404).json({ error: 'Course not found' });
+      res.status(200).json(archivedCourse); // as break point for debugging
+
+      // const contents = await contentModel.find({ course: courseId });
+
+      // const response = {
+      //   _id: archivedCourse._id,
+      //   title: archivedCourse.title,
+      //   description: archivedCourse.description,
+      //   category: archivedCourse.category.name,
+      //   instructor: `${archivedCourse.instructor.firstName} ${archivedCourse.instructor.lastName}`,
+      //   createdAt: format(new Date(archivedCourse.createdAt), 'd-M-yyyy'),
+      //   updatedAt: format(new Date(archivedCourse.updatedAt), 'd-M-yyyy'),
+      //   isPublic: archivedCourse.isPublic,
+      //   contents: contents.map(content => ({
+      //     title: content.title,
+      //     type: content.type,
+      //     isPublic: content.isPublic,
+      //     data: content.data,
+      //   })),
+      // };
+
+      // res.status(200).json(response);
+    } catch (err) {
+      console.error('Error fetching courses:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
 
 }
 

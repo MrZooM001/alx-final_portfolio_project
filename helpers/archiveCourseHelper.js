@@ -36,16 +36,8 @@ const archiveCourseHelper = async (courseId) => {
         return await contents.save();
       }));
 
-    console.log('############### Debug #################')
-    console.log('Archived contents:', archivedContents);
-    console.log('############### Debug #################')
-
     archivedCourse.contents = archivedContents.map(content => content._id);
     await archivedCourse.save();
-
-    console.log('############### Debug #################')
-    console.log('Archived course:', archivedCourse);
-    console.log('############### Debug #################')
 
     return archivedCourse;
   } catch (err) {

@@ -17,9 +17,9 @@ courseRouter.post('/:courseId/update', verifyAccessToken, CourseController.updat
 
 courseRouter.post('/:courseId/add-content', verifyAccessToken, ContentController.addContentToCourse);
 
-courseRouter.delete('/:courseId/delete', verifyAccessToken, CourseController.deleteCourse);
+courseRouter.delete('/:courseId/full-delete', verifyAccessToken, CourseController.fullDeleteCourse);
 
-courseRouter.post('/archive/:courseId/restore', verifyAccessToken, CourseController.restoreCourse);
+courseRouter.delete('/:courseId/delete', verifyAccessToken, CourseController.deleteCourse);
 
 //#endregion
 
