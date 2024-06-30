@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
+import adminRouter from './routes/adminRoutes.js';
 import appRouter from './routes/appRoutes.js';
 import authRouter from './routes/authRoutes.js';
 import usersRouter from './routes/userRoutes.js';
@@ -22,6 +23,7 @@ app.use('/auth/', authRouter);
 app.use('/users/', usersRouter);
 app.use('/courses/', courseRouter);
 app.use('/archive/', archiveRouter);
+app.use('/api-admin/', adminRouter);
 
 app.listen(API_PORT, () => {
   console.log(`

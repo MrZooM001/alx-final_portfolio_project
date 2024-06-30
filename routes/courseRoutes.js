@@ -2,6 +2,7 @@ import express from 'express';
 import CourseController from '../controllers/CourseController.js';
 import ContentController from '../controllers/ContentController.js';
 import EnrollmentController from '../controllers/EnrollmentController.js';
+import { checkUserRole } from '../middlewares/checkUserRoleMiddleware.js';
 import { verifyAccessToken } from '../middlewares/verifyAccessTokenMiddleware.js';
 
 const courseRouter = express.Router();

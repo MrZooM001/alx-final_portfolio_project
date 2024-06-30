@@ -9,6 +9,7 @@ const userSchema = new Schema({
   lastName: { type: String, trim: true },
   dateOfBirth: { type: Date },
   role: { type: String, enum: ['student', 'instructor', 'admin'], default: 'student' },
+  isSuspended: { type: Boolean, default: false },
 }, { timestamps: true });
 
 userSchema.pre('save', hashPassword);

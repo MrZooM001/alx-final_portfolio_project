@@ -14,6 +14,10 @@ class AuthController {
       const isMatched = await user.isMatchedPassword(validation.password);
       if (!isMatched) return res.status(401).json({ error: 'Invalid Email or password' });
 
+      if (user.isSuspended) {
+        return res.status(403).json({ error: 'Account has been suspended' });
+      }
+      
       const accessToken = await signAccessToken(user);
       const refreshToken = await signRefreshToken(user);
 

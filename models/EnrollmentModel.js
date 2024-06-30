@@ -5,10 +5,10 @@ const enrollmentSchema = new Schema({
   course: { type: Schema.Types.ObjectId, ref: 'course', required: true },
   status: { type: String, enum: ['enrolled', 'completed', 'dropped'], default: 'enrolled' },
   enrolledAt: { type: Date, default: Date.now() },
-  completedAt: { type: Date },
-  droppedAt: { type: Date },
   progress: { type: Number, default: 0 },
-  grade: { type: Number },
+  isCompleted: { type: Boolean, default: false },
+  completedAt: { type: Date },
+  completedContents: [{ type: Schema.Types.ObjectId, ref: 'content' }],
 }, { timestamps: true });
 
 const Enrollment = model('enrollment', enrollmentSchema);

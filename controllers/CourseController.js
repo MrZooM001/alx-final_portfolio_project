@@ -11,6 +11,39 @@ import archivedCourseModel from '../models/ArchivedCourseModel.js';
 import archivedContentModel from '../models/ArchivedContentModel.js';
 
 class CourseController {
+  static async getAllCourses(req, res) {
+    try {
+      const courses = await courseModel.find({})
+        .populate('category')
+        .populate('instructor');
+
+      if (!courses) return res.status(404).json({ error: 'No courses created yet!' });
+
+      const response = await Promise.all(
+        courses.filter(course => course.isPublic === false)
+          .map(async course => {
+            const contentCount = await contentModel.countDocuments({ course: course._id });
+            return {
+              _id: course._id,
+              title: course.title,
+              description: course.description,
+              category: course.category.name,
+              instructor: `${course.instructor.firstName} ${course.instructor.lastName}`,
+              contents: contentCount,
+              createdAt: format(new Date(course.createdAt), 'd-M-yyyy'),
+              updatedAt: format(new Date(course.updatedAt), 'd-M-yyyy'),
+            }
+          }));
+
+      const totalCourses = await courseModel.countDocuments();
+
+      res.status(200).json({ totalCourses, response });
+    } catch (err) {
+      console.error('Error fetching courses:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
   static async createCourse(req, res) {
     try {
       const userRole = req.user.role;
@@ -65,44 +98,8 @@ class CourseController {
     }
   }
 
-  static async getAllCourses(req, res) {
-    try {
-      const courses = await courseModel.find({})
-        .populate('category')
-        .populate('instructor');
-
-      if (!courses) return res.status(404).json({ error: 'Course not found' });
-
-      const response = await Promise.all(
-        courses.filter(course => course.isPublic === false)
-          .map(async course => {
-            const contentCount = await contentModel.countDocuments({ course: course._id });
-            return {
-              _id: course._id,
-              title: course.title,
-              description: course.description,
-              category: course.category.name,
-              instructor: `${course.instructor.firstName} ${course.instructor.lastName}`,
-              contents: contentCount,
-              createdAt: format(new Date(course.createdAt), 'd-M-yyyy'),
-              updatedAt: format(new Date(course.updatedAt), 'd-M-yyyy'),
-            }
-          }));
-
-      res.status(200).json(response);
-    } catch (err) {
-      console.error('Error fetching courses:', err.message);
-      return res.status(500).json({ error: err.message });
-    }
-  }
-
   static async getCourseById(req, res) {
     try {
-      // const userRole = req.user.role;
-      // if (!['instructor', 'admin'].includes(userRole)) {
-      //   return res.status(401).json({ error: 'You need to be a teacher to update a course!' });
-      // }
-
       const courseId = req.params.courseId;
 
       const course = await courseModel.findById(courseId)
@@ -149,8 +146,10 @@ class CourseController {
       const currentCourse = await courseModel.findById(courseId);
       if (!currentCourse) return res.status(404).json({ error: 'Course not found' });
 
-      if (req.user._id !== currentCourse.instructor.toString()) {
-        return res.status(403).json({ error: 'This is not your course to update!' });
+      if (userRole !== 'admin') {
+        if (req.user._id !== currentCourse.instructor.toString()) {
+          return res.status(403).json({ error: 'This is not your course to update!' });
+        }
       }
 
       const { title, description, category, contents } = req.body;
@@ -213,8 +212,10 @@ class CourseController {
       const currentCourse = await courseModel.findById(courseId);
       if (!currentCourse) return res.status(404).json({ error: 'Course not found' });
 
-      if (req.user._id !== currentCourse.instructor.toString()) {
-        return res.status(403).json({ error: 'This is not your course to delete!' });
+      if (userRole !== 'admin') {
+        if (req.user._id !== currentCourse.instructor.toString()) {
+          return res.status(403).json({ error: 'This is not your course to delete!' });
+        }
       }
 
       const archiveCourse = await archiveCourseHelper(courseId);
@@ -238,10 +239,14 @@ class CourseController {
       }
 
       const courseId = req.params.courseId;
-      const currentCourse = await archivedCourseModel.findById(courseId);
 
-      if (!currentCourse || req.user._id !== currentCourse.instructor.toString()) {
-        return res.status(404).json({ error: 'Course not found' });
+      const currentCourse = await archivedCourseModel.findById(courseId);
+      if (!currentCourse) return res.status(404).json({ error: 'Course not found' });
+
+      if (userRole !== 'admin') {
+        if (req.user._id !== currentCourse.instructor.toString()) {
+          return res.status(404).json({ error: 'Course not found' });
+        }
       }
 
       const restoredCourse = await restoreCourseHelper(courseId);
@@ -268,8 +273,10 @@ class CourseController {
       const currentCourse = await courseModel.findById(courseId);
       if (!currentCourse) return res.status(404).json({ error: 'Course not found' });
 
-      if (req.user._id !== currentCourse.instructor.toString()) {
-        return res.status(403).json({ error: 'This is not your course to delete!' });
+      if (userRole !== 'admin') {
+        if (req.user._id !== currentCourse.instructor.toString()) {
+          return res.status(403).json({ error: 'This is not your course to delete!' });
+        }
       }
 
       await contentModel.deleteMany({ course: courseId });
@@ -282,12 +289,12 @@ class CourseController {
     }
   }
 
-  static async getAllArchivedCourses(req, res) {
+  static async getArchivedCoursesByUser(req, res) {
     try {
       const userRole = req.user.role;
 
       if (!['instructor', 'admin'].includes(userRole)) {
-        return res.status(401).json({ error: 'You need to be a teacher to update a course!' });
+        return res.status(403).json({ error: 'Access is denied' });
       }
 
       const userId = req.user._id;
@@ -325,7 +332,7 @@ class CourseController {
     try {
       const userRole = req.user.role;
       if (!['instructor', 'admin'].includes(userRole)) {
-        return res.status(401).json({ error: 'You need to be a teacher to update a course!' });
+        return res.status(401).json({ error: 'Access is denied' });
       }
 
       const courseId = req.params.courseId;
@@ -360,6 +367,38 @@ class CourseController {
       res.status(200).json(response);
     } catch (err) {
       console.error('Error fetching courses:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  static async getAllArchivedCourses(req, res) {
+    try {
+      const archivedCourses = await archivedCourseModel.find({})
+        .populate('category')
+        .populate('instructor');
+
+      if (!archivedCourses) return res.status(404).json({ error: 'No archived courses found' });
+
+      const response = await Promise.all(
+        archivedCourses.map(async course => {
+          const archivedContentsCount = await archivedContentModel.countDocuments({ course: course._id });
+          return {
+            _id: course._id,
+            title: course.title,
+            description: course.description,
+            category: course.category.name,
+            instructor: `${course.instructor.firstName} ${course.instructor.lastName}`,
+            contents: archivedContentsCount,
+            createdAt: format(new Date(course.createdAt), 'd-M-yyyy'),
+            updatedAt: format(new Date(course.updatedAt), 'd-M-yyyy'),
+            archivedAt: format(new Date(course.archivedAt), 'd-M-yyyy'),
+          }
+        }));
+      const totalArchivedCourses = await archivedCourseModel.countDocuments();
+
+      res.status(200).json({ total: totalArchivedCourses, archivedCourses: response });
+    } catch (err) {
+      console.error('Error fetching archived courses:', err.message);
       return res.status(500).json({ error: err.message });
     }
   }

@@ -1,15 +1,12 @@
 import enrollmentModel from '../models/EnrollmentModel.js';
 import courseModel from '../models/CourseModel.js';
+import contentModel from '../models/ContentModel.js';
 
 class EnrollmentController {
   static async enrollUserInCourse(req, res) {
     try {
       const courseId = req.params.courseId;
       const user = req.user;
-
-      if (!user) {
-        return res.status(401).json({ error: 'You need to register/login to enroll in this course' });
-      }
 
       const course = await courseModel.findById(courseId);
       if (!course) {
@@ -94,6 +91,46 @@ class EnrollmentController {
       return res.status(200).json({ message: `Successfully disenrolled from course \'${course.title}\'` });
     } catch (err) {
       console.error('Error disenrolling user from course:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  static async markContentAsCompleted(req, res) {
+    try {
+      const user = req.user;
+      const contentId = req.params.contentId;
+
+      const content = await contentModel.findById(contentId);
+      if (!content) {
+        return res.status(404).json({ error: 'Content not found' });
+      }
+
+      const enrollment = await enrollmentModel.findOne({ user: user._id, course: content.course });
+      if (!enrollment) {
+        return res.status(404).json({ error: 'You are not enrolled in the course' });
+      }
+
+      if (!enrollment.completedContents.includes(contentId)) {
+        enrollment.completedContents.push(contentId);
+
+        const totalCourseContents = await contentModel.countDocuments({ course: content.course });
+        const completedCount = enrollment.completedContents.length;
+
+        enrollment.isCompleted = completedCount === totalCourseContents;
+        if (enrollment.isCompleted) enrollment.completedAt = new Date();
+
+        // Get the percentage of completed contents
+        enrollment.progress = (completedCount / totalCourseContents) * 100;
+
+        await enrollment.save();
+      }
+
+      return res.status(200).json({
+        message: 'Content has been successfully marked as complete',
+        progress: enrollment.progress
+      });
+    } catch (err) {
+      console.error('Error marking content as completed:', err.message);
       return res.status(500).json({ error: err.message });
     }
   }

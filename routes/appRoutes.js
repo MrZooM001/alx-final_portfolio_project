@@ -8,7 +8,7 @@ const appRouter = express.Router();
 appRouter.get('/', async (req, res) => {
   res.status(200).json({
     greeting: "Hi fellas!",
-    message: "Welcome to Innovative Learning Platform - LMS API",
+    message: "Welcome to Innovative Learning Platform API - Learning Management System",
   });
 });
 //#endregion
