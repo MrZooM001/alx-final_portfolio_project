@@ -1,5 +1,6 @@
 import JWT from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import httpErrors from 'http-errors';
 import { env } from 'process';
 import redisClient from '../utils/redis.js';
 
@@ -31,7 +32,7 @@ const signAccessToken = (user) => {
 
 const blackListRefreshToken = async (token) => {
   const payload = JWT.decode(token);
-  if (!payload) throw new Error('Invalid Token');
+  if (!payload) throw httpErrors.BadRequest('Invalid Token');
 
   const expiration = payload.exp;
   const currentTime = Math.floor(Date.now() / 1000);
@@ -67,7 +68,7 @@ const signRefreshToken = (user) => {
         if (result) {
           resolve(token);
         } else {
-          throw new Error('Failed to set token in Redis');
+          throw httpErrors.InternalServerError('Failed to set token in Redis');
         }
       } catch (redisErr) {
         console.error('Redis error:', redisErr.message);
@@ -87,14 +88,14 @@ const verifyRefreshToken = (refreshToken) => {
       try {
         const isBlackListedToken = await isBlackListed(refreshToken);
         if (isBlackListedToken) {
-          return reject(new Error('Invalid refresh token'));
+          return reject(httpErrors.BadRequest('Invalid refresh token'));
         }
 
         const result = await redisClient.get(`user:${userId}`);
         if (refreshToken === result) {
           resolve(userId)
         } else {
-          reject(new Error('Invalid refresh token'));
+          reject(httpErrors.BadRequest('Invalid refresh token'));
         }
       } catch (redisErr) {
         console.error('Redis error:', redisErr.message);

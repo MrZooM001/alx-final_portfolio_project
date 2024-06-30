@@ -1,7 +1,8 @@
+import httpErrors from 'http-errors';
 import contentModel from '../models/ContentModel.js';
 
 const createContentItems = async (courseId, contents) => {
-  if (!Array.isArray(contents)) throw new Error('Contents should be an array');
+  if (!Array.isArray(contents)) throw httpErrors.BadRequest('Contents should be an array');
 
   try {
     const contentItems = contents.map(content => new contentModel({

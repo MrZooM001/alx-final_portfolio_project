@@ -23,7 +23,7 @@ class AuthController {
 
       res.status(200).json({ accessToken, refreshToken });
     } catch (err) {
-      res.status(400).json({ error: err.message });
+      res.status(err.statusCode).json({ error: err.message });
       next(err);
     }
   }
@@ -48,7 +48,7 @@ class AuthController {
     } catch (err) {
       console.error('Error during logout:', err.message);
       next(err);
-      return res.status(500).json({ error: err.message });
+      return res.status(err.statusCode).json({ error: err.message });
     }
   }
 

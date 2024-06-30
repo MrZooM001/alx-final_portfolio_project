@@ -17,6 +17,7 @@ app.use(morgan('dev'));
 
 const API_PORT = process.env.API_PORT || 5000;
 const API_HOST = process.env.API_HOST || 'localhost';
+const apiRoot = '/api/v1';
 
 app.use('/', appRouter);
 app.use('/auth/', authRouter);

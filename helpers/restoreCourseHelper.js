@@ -1,3 +1,4 @@
+import httpErrors from 'http-errors';
 import archivedCourseModel from '../models/ArchivedCourseModel.js';
 import archivedContentModel from '../models/ArchivedContentModel.js';
 import courseModel from '../models/CourseModel.js';
@@ -6,7 +7,7 @@ import contentModel from '../models/ContentModel.js';
 const restoreCourseHelper = async (courseId) => {
   try {
     const archivedCourse = await archivedCourseModel.findById(courseId).populate('contents');
-    if (!archivedCourse) throw new Error('Course not found');
+    if (!archivedCourse) throw httpErrors.NotFound('Course not found');
 
     const restoredCourse = new courseModel({
       _id: archivedCourse._id,

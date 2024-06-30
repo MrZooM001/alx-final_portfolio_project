@@ -11,38 +11,6 @@ import archivedCourseModel from '../models/ArchivedCourseModel.js';
 import archivedContentModel from '../models/ArchivedContentModel.js';
 
 class CourseController {
-  static async getAllCourses(req, res) {
-    try {
-      const courses = await courseModel.find({})
-        .populate('category')
-        .populate('instructor');
-
-      if (!courses) return res.status(404).json({ error: 'No courses created yet!' });
-
-      const response = await Promise.all(
-        courses.filter(course => course.isPublic === false)
-          .map(async course => {
-            const contentCount = await contentModel.countDocuments({ course: course._id });
-            return {
-              _id: course._id,
-              title: course.title,
-              description: course.description,
-              category: course.category.name,
-              instructor: `${course.instructor.firstName} ${course.instructor.lastName}`,
-              contents: contentCount,
-              createdAt: format(new Date(course.createdAt), 'd-M-yyyy'),
-              updatedAt: format(new Date(course.updatedAt), 'd-M-yyyy'),
-            }
-          }));
-
-      const totalCourses = await courseModel.countDocuments();
-
-      res.status(200).json({ totalCourses, response });
-    } catch (err) {
-      console.error('Error fetching courses:', err.message);
-      return res.status(500).json({ error: err.message });
-    }
-  }
 
   static async createCourse(req, res) {
     try {
@@ -94,44 +62,7 @@ class CourseController {
       return res.status(200).json({ sucess: true, savedCourse });
     } catch (err) {
       console.error('Error creating course:', err.message);
-      return res.status(500).json({ error: err.message });
-    }
-  }
-
-  static async getCourseById(req, res) {
-    try {
-      const courseId = req.params.courseId;
-
-      const course = await courseModel.findById(courseId)
-        .populate('category')
-        .populate('instructor')
-        .populate('contents');
-
-      if (!course) return res.status(404).json({ error: 'Course not found' });
-
-      const contents = await contentModel.find({ course: courseId });
-
-      const response = {
-        _id: course._id,
-        title: course.title,
-        description: course.description,
-        category: course.category.name,
-        instructor: `${course.instructor.firstName} ${course.instructor.lastName}`,
-        createdAt: format(new Date(course.createdAt), 'd-M-yyyy'),
-        updatedAt: format(new Date(course.updatedAt), 'd-M-yyyy'),
-        isPublic: course.isPublic,
-        contents: contents.map(content => ({
-          title: content.title,
-          type: content.type,
-          isPublic: content.isPublic,
-          data: content.data,
-        })),
-      };
-
-      res.status(200).json(response);
-    } catch (err) {
-      console.error('Error fetching courses:', err.message);
-      return res.status(500).json({ error: err.message });
+      return res.status(err.statusCode).json({ error: err.message });
     }
   }
 
