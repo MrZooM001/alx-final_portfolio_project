@@ -2,7 +2,7 @@ import enrollmentModel from '../models/EnrollmentModel.js';
 import courseModel from '../models/CourseModel.js';
 
 class EnrollmentController {
-  static async enrollUserToCourse(req, res) {
+  static async enrollUserInCourse(req, res) {
     try {
       const courseId = req.params.courseId;
       const user = req.user;
@@ -33,7 +33,7 @@ class EnrollmentController {
 
       await enrollment.save();
       return res.status(200).json({
-        message: `successfully enrolled to course "${course.title}"`, enrollment
+        message: `successfully enrolled to course \'${course.title}\'`, enrollment
       });
     } catch (err) {
       console.error('Error enrolling user in course:', err.message);
@@ -44,9 +44,9 @@ class EnrollmentController {
 
   static async getEnrolledCoursesByUser(req, res) {
     try {
-      const studentId = req.user._id;
+      const userId = req.user._id;
 
-      const enrollments = await enrollmentModel.find({ user: studentId })
+      const enrollments = await enrollmentModel.find({ user: userId })
         .populate('course')
         .populate('user');
 
@@ -73,7 +73,29 @@ class EnrollmentController {
   }
 
   static async disenrollFromCourse(req, res) {
+    try {
+      const courseId = req.params.courseId;
+      const user = req.user;
 
+      const course = await courseModel.findById(courseId);
+      if (!course) {
+        return res.status(404).json({ error: 'Course not found' });
+      }
+
+      if (user._id === course.instructor.toString()) {
+        return res.status(403).json({ error: 'You cannot enroll in your own course to disenroll from!' });
+      }
+
+      const enrollment = await enrollmentModel.findOneAndDelete({ user: user._id, course: courseId });
+      if (!enrollment) {
+        return res.status(404).json({ error: 'Enrollment not found' });
+      }
+
+      return res.status(200).json({ message: `Successfully disenrolled from course \'${course.title}\'` });
+    } catch (err) {
+      console.error('Error disenrolling user from course:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
   }
 
 }
