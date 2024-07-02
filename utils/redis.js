@@ -3,23 +3,21 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const RDS_USER = process.env.REDIS_USER;
-const RDS_PASSWORD = process.env.RDS_PASSWORD;
-const RDS_HOST = process.env.RDS_HOST;
-const RDS_PORT = process.env.RDS_PORT;
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD;
+const REDIS_ENDPOINT_URI = process.env.REDIS_ENDPOINT_URI;
+const REDIS_PORT = process.env.REDIS_PORT;
+const REDIS_USERNAME = process.env.REDIS_USERNAME;
 
 class RedisClient {
   constructor() {
     this.client = createClient({
-      password: RDS_PASSWORD,
+      username: REDIS_USERNAME,
+      password: REDIS_PASSWORD,
       socket: {
-        host: RDS_HOST,
-        port: RDS_PORT
+        host: REDIS_ENDPOINT_URI,
+        port: REDIS_PORT
       }
     });
-
-    // hhazem0010
-    // JZcVH57!zYbQih7
 
     this.isConnected = false;
 
@@ -54,6 +52,7 @@ class RedisClient {
   async connect() {
     try {
       await this.client.connect();
+      this.isConnected = true;
     } catch (err) {
       console.error('Redis connection error:', err.message || err.toString());
     }

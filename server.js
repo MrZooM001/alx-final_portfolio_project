@@ -13,8 +13,8 @@ import archiveRouter from './routes/archiveRoutes.js';
 
 dotenv.config();
 
-const PORT = process.env.PORT || 5000;
-const HOST = process.env.HOST || 'localhost';
+const PORT = process.env.PORT;
+const HOST = process.env.HOST;
 
 const app = express();
 app.use(cors());
