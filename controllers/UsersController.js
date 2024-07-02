@@ -179,6 +179,10 @@ class UsersController {
       const { page, limit } = chechPagination(req.query.page, req.query.limit)
       let totalUsers = await userModel.countDocuments();
 
+      if (totalUsers === 0) {
+        return res.status(404).json({ error: 'No users found' });
+      }
+
       const matchQuery = {};
 
       if (email) {

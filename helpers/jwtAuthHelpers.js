@@ -15,7 +15,7 @@ const signAccessToken = (user) => {
     };
 
     const options = {
-      expiresIn: '12h',
+      expiresIn: 60 * 60 * 24,
       issuer: 'InnovativeLearningPlatform',
       audience: user._id.toString(),
     };
@@ -52,7 +52,7 @@ const signRefreshToken = (user) => {
   return new Promise((resolve, reject) => {
     const payload = {};
     const options = {
-      expiresIn: '24h',
+      expiresIn: 60 * 60 * 24 * 30,
       issuer: 'InnovativeLearningPlatform',
       audience: user._id.toString(),
     };

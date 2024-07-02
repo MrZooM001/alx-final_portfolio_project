@@ -18,6 +18,10 @@ class QueryController {
       let cachedCourses = await redisClient.get(cacheKey);
 
       let totalCourses = await courseModel.countDocuments({ isPublic: true });
+      if (totalCourses === 0) {
+        return res.status(404).json({ error: 'No courses found' });
+      }
+
       const cachedTotalCourses = await redisClient.get('totalCourses');
 
       if (cachedCourses && cachedTotalCourses === totalCourses) {

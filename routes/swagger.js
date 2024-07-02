@@ -191,6 +191,19 @@
  *       name: Programmming
  *       createdAt: 2023-07-02T14:30:00Z
  *       updatedAt: 2023-07-05T10:15:00Z
+ *     Error:
+ *       type: object
+ *       properties:
+ *         status:
+ *           type: integer
+ *         type:
+ *           type: string
+ *         message:
+ *           type: string
+ *       example:
+ *         status: 404
+ *         type: "Not Found"
+ *         message: "No courses found"
  */
 //#endregion
 
@@ -207,6 +220,13 @@
  * tags:
  *   name: Courses
  *   description: The courses management API
+ */
+
+/**
+ * @swagger
+ * tags:
+ *   name: API-Admin
+ *   description: API for Admins only to manage restricted endpoints.
  */
 //#endregion
 
@@ -261,3 +281,137 @@
  */
 //#endregion
 
+//#region Users Endpoints
+/**
+ * @swagger
+ * /users/register/:
+ *  post:
+ *   summary: register a new user account.
+ *   tags: [Courses]
+ *   parameters:
+ *    - in: query
+ *      name: title
+ *      schema:
+ *        type: string
+ *      description: Search term to filter courses by title
+ *    - in: query
+ *      name: description
+ *      schema:
+ *        type: string
+ *      description: Search term to filter courses by description
+ *    - in: query
+ *      name: instructor
+ *      schema:
+ *        type: string
+ *      description: Search term to filter courses by instructor's first name or last name
+ *    - in: query
+ *      name: category
+ *      schema:
+ *        type: string
+ *      description: Search term to filter courses by category name
+ *   responses:
+ *    200:
+ *     description: List of published courses.
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/Course'
+ *    404:
+ *     description: No courses found or no courses match your search
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/Error'
+ * 
+ */
+//#endregion
+
+//#region Courses Endpoints
+/**
+ * @swagger
+ * /courses/:
+ *  get:
+ *   summary: Get a list of all published courses.
+ *   tags: [Courses]
+ *   parameters:
+ *    - in: query
+ *      name: title
+ *      schema:
+ *        type: string
+ *      description: Search term to filter courses by title
+ *    - in: query
+ *      name: description
+ *      schema:
+ *        type: string
+ *      description: Search term to filter courses by description
+ *    - in: query
+ *      name: instructor
+ *      schema:
+ *        type: string
+ *      description: Search term to filter courses by instructor's first name or last name
+ *    - in: query
+ *      name: category
+ *      schema:
+ *        type: string
+ *      description: Search term to filter courses by category name
+ *   responses:
+ *    200:
+ *     description: List of published courses.
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/Course'
+ *    404:
+ *     description: No courses found /OR/ No courses match your search
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/Error'
+ * 
+ */
+//#endregion
+
+//#region API Admin Endpoints
+/**
+ * @swagger
+ * /api-admin/users/:
+ *  get:
+ *   summary: Get a list of all registerd users .
+ *   tags: [API-Admin]
+ *   parameters:
+ *    - in: query
+ *      name: email
+ *      schema:
+ *        type: string
+ *      description: Search term to filter users by email
+ *    - in: query
+ *      name: firstName
+ *      schema:
+ *        type: string
+ *      description: Search term to filter users by first name
+ *    - in: query
+ *      name: lastName
+ *      schema:
+ *        type: string
+ *      description: Search term to filter users by last name
+ *    - in: query
+ *      name: role
+ *      schema:
+ *        type: string
+ *      description: Search term to filter users by role
+ *   responses:
+ *    200:
+ *     description: List of all registed users, including suspended users.
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/User'
+ *    404:
+ *     description: No users found /OR/ No users match your search
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/Error'
+ * 
+ */
+//#endregion
