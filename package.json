@@ -5,7 +5,6 @@
     "main": "server.js",
     "type": "module",
     "scripts": {
-        "start": "pm2 start server.js",
         "devStart": "nodemon server.js"
     },
     "keywords": [],
