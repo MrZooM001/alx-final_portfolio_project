@@ -14,7 +14,7 @@ import archiveRouter from './routes/archiveRoutes.js';
 dotenv.config();
 
 const PORT = process.env.PORT;
-const HOST = process.env.HOST;
+const HOST = process.env.HOST || 'https://innovative-learning-api-e73228a278b9.herokuapp.com/';
 
 const app = express();
 app.use(express.json());
@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
 const corsOptions = {
-  origin: `http://${HOST}:${PORT}/`,
+  origin: HOST,
   optionsSuccessStatus: 200,
 };
 
@@ -38,12 +38,12 @@ const options = {
       contact: {
         name: 'API Support',
         email: 'support@ilearningplafrom.com',
-        url: 'https://api.ilearningplafrom.com/support'
+        url: HOST
       }
     },
     servers: [
       {
-        url: `http://${HOST}:${PORT}`
+        url: HOST
       }
     ]
   },
@@ -63,5 +63,5 @@ app.use('/api/docs', swaggerUI.serve, swaggerUI.setup(specs));
 
 
 app.listen(PORT, () => {
-  console.log(`NodeJS Server is listening on http://${HOST}:${PORT}/`);
+  console.log(`NodeJS Server is listening on port ${PORT}`);
 });
