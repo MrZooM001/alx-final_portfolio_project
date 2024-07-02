@@ -57,11 +57,5 @@ app.use('/api/docs', swaggerUI.serve, swaggerUI.setup(specs));
 
 
 app.listen(PORT, () => {
-  console.log(`
-    \t◤⁗‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷‷◥
-    \t|    Innovative Learning Platform API    |
-    \t|    ————————————————————————————————    |
-    \t|     » Learning Management System «     |
-    \t◣…………………………………………………………………………………………………………◢
-\nNodeJS Server is listening on http://${HOST}:${PORT}/\n`);
+  console.log(`NodeJS Server is listening on http://${HOST}:${PORT}/`);
 });

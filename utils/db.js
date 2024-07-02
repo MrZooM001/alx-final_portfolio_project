@@ -1,14 +1,17 @@
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import userModel from '../models/UserModel.js';
 import courseModel from '../models/CourseModel.js';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
-const DB_HOST = process.env.DB_HOST || 'localhost';
-const DB_PORT = process.env.DB_PORT || '27017';
-const DB_NAME = process.env.DB_DATABASE || 'ilp_lms_api_db';
-const mongoUri = `mongodb://${DB_HOST}:${DB_PORT}`;
+const DB_USER = process.env.DB_USER;
+const DB_PASSWORD = process.env.DB_PASSWORD;
+const DB_NAME = process.env.DB_DATABASE;
+const DB_APP_NAME = process.env.DB_APP_NAME;
+const DB_URL = process.env.DB_URL;
+
+const mongoUri = `mongodb+srv://${DB_USER}:${DB_PASSWORD}@${DB_URL}/?retryWrites=true&w=majority&appName=${DB_APP_NAME}`;
 
 class DBClient {
   constructor() {
