@@ -15,7 +15,7 @@ const signAccessToken = (user) => {
     };
 
     const options = {
-      expiresIn: '1h',
+      expiresIn: '12h',
       issuer: 'InnovativeLearningPlatform',
       audience: user._id.toString(),
     };

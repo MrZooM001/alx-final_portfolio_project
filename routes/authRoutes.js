@@ -9,6 +9,7 @@ authRouter.post('/login', AuthController.loginUser);
 
 // Logout a user
 authRouter.delete('/logout', AuthController.logoutUser);
+
 //#endregion
 
 export default authRouter;

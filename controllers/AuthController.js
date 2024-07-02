@@ -17,7 +17,7 @@ class AuthController {
       if (user.isSuspended) {
         return res.status(403).json({ error: 'Account has been suspended' });
       }
-      
+
       const accessToken = await signAccessToken(user);
       const refreshToken = await signRefreshToken(user);
 
@@ -51,6 +51,8 @@ class AuthController {
       return res.status(err.statusCode).json({ error: err.message });
     }
   }
+
+  
 
 }
 

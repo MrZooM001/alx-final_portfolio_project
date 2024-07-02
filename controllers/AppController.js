@@ -27,7 +27,7 @@ class AppController {
     res.status(200).json(status);
   }
 
-  
+
   static async getStats(req, res) {
     const countUsers = await dbClient.countUsers();
     const countCourses = await dbClient.countCourses();

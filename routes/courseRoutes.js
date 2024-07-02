@@ -8,14 +8,13 @@ import { verifyAccessToken } from '../middlewares/verifyAccessTokenMiddleware.js
 
 const courseRouter = express.Router();
 
-// Get & Search courses by title, description and instructor name
 courseRouter.get('/', QueryController.getAllCourses);
 
 courseRouter.get('/:courseId', QueryController.getCourseById);
 
 courseRouter.get('/:courseId/content', QueryController.getAllContentForCourse);
 
-courseRouter.get('/:courseId/content/:contentId', QueryController.getCourceContentById);
+courseRouter.get('/:courseId/content/:contentId', QueryController.getContentById);
 
 // Create a new course
 courseRouter.post('/create', verifyAccessToken, CourseController.createCourse);

@@ -5,8 +5,7 @@ import { verifyAccessToken } from '../middlewares/verifyAccessTokenMiddleware.js
 
 const usersRouter = express.Router();
 
-//#region UserController
-// Register a new user
+
 usersRouter.post('/register', UsersController.registerUser);
 
 usersRouter.post('/update', verifyAccessToken, UsersController.updateUser);
@@ -17,6 +16,6 @@ usersRouter.post('/update-password', verifyAccessToken, UsersController.updatePa
 usersRouter.get('/active-users', verifyAccessToken, UsersController.getActiveUsers);
 
 usersRouter.get('/enrolled-courses', verifyAccessToken, EnrollmentController.getEnrolledCoursesByUser);
-//#endregion
+
 
 export default usersRouter;

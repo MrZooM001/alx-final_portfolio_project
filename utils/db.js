@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import User from '../models/UserModel.js';
-import Course from '../models/CourseModel.js';
+import userModel from '../models/UserModel.js';
+import courseModel from '../models/CourseModel.js';
 
 dotenv.config();
 
@@ -51,7 +51,7 @@ class DBClient {
    */
   async countUsers() {
     if (!this.isAlive()) return 0;
-    return User.countDocuments();
+    return userModel.countDocuments({ isSuspended: false });
   }
 
   /**
@@ -62,7 +62,7 @@ class DBClient {
    */
   async countCourses() {
     if (!this.isAlive()) return 0;
-    return Course.countDocuments();
+    return courseModel.countDocuments({ isPublic: true });
   }
 }
 

@@ -74,6 +74,7 @@ class CourseController {
       }
 
       const courseId = req.params.courseId;
+
       const currentCourse = await courseModel.findById(courseId);
       if (!currentCourse) return res.status(404).json({ error: 'Course not found' });
 
@@ -171,11 +172,11 @@ class CourseController {
 
       const courseId = req.params.courseId;
 
-      const currentCourse = await archivedCourseModel.findById(courseId);
-      if (!currentCourse) return res.status(404).json({ error: 'Course not found' });
+      const course = await archivedCourseModel.findById(courseId);
+      if (!course) return res.status(404).json({ error: 'Course not found' });
 
       if (userRole !== 'admin') {
-        if (req.user._id !== currentCourse.instructor.toString()) {
+        if (req.user._id !== course.instructor.toString()) {
           return res.status(404).json({ error: 'Course not found' });
         }
       }
@@ -220,46 +221,7 @@ class CourseController {
     }
   }
 
-  static async getArchivedCoursesByUser(req, res) {
-    try {
-      const userRole = req.user.role;
-
-      if (!['instructor', 'admin'].includes(userRole)) {
-        return res.status(403).json({ error: 'Access is denied' });
-      }
-
-      const userId = req.user._id;
-
-      const archivedCourses = await archivedCourseModel.find({ instructor: userId })
-        .populate('category')
-        .populate('instructor');
-
-      if (!archivedCourses) return res.status(404).json({ error: 'No archived courses found' });
-
-      const response = await Promise.all(
-        archivedCourses.map(async course => {
-          const archivedContentsCount = await archivedContentModel.countDocuments({ course: course._id });
-          return {
-            _id: course._id,
-            title: course.title,
-            description: course.description,
-            category: course.category.name,
-            instructor: `${course.instructor.firstName} ${course.instructor.lastName}`,
-            contents: archivedContentsCount,
-            createdAt: format(new Date(course.createdAt), 'd-M-yyyy'),
-            updatedAt: format(new Date(course.updatedAt), 'd-M-yyyy'),
-            archivedAt: format(new Date(course.archivedAt), 'd-M-yyyy'),
-          }
-        }));
-
-      res.status(200).json({ archivedCourses: response });
-    } catch (err) {
-      console.error('Error fetching archived courses:', err.message);
-      return res.status(500).json({ error: err.message });
-    }
-  }
-
-  static async getArchivedCourseById(req, res) {
+  static async publishCourse(req, res) {
     try {
       const userRole = req.user.role;
       if (!['instructor', 'admin'].includes(userRole)) {
@@ -267,69 +229,27 @@ class CourseController {
       }
 
       const courseId = req.params.courseId;
-      const userId = req.user._id;
 
-      const archivedCourse = await archivedCourseModel.find({ _id: courseId, instructor: userId })
-        .populate('category')
-        .populate('instructor')
-        .populate('contents');
+      if (userRole !== 'admin') {
+        if (req.user._id !== course.instructor.toString()) {
+          return res.status(403).json({ error: 'This is not your course to update!' });
+        }
+      }
 
-      if (!archivedCourse || archivedCourse.length === 0) return res.status(404).json({ error: 'Course not found' });
+      const course = await courseModel
+        .findOneAndUpdate(
+          { _id: courseId },
+          {
+            $set: { isPublic: true }
+          },
+          { new: true }
+        );
 
-      const contents = await contentModel.find({ course: courseId });
+      if (!course) return res.status(404).json({ error: 'Course not found' });
 
-      const response = {
-        _id: archivedCourse._id,
-        title: archivedCourse.title,
-        description: archivedCourse.description,
-        category: archivedCourse.category.name,
-        instructor: `${archivedCourse.instructor.firstName} ${archivedCourse.instructor.lastName}`,
-        createdAt: format(new Date(archivedCourse.createdAt), 'd-M-yyyy'),
-        updatedAt: format(new Date(archivedCourse.updatedAt), 'd-M-yyyy'),
-        isPublic: archivedCourse.isPublic,
-        contents: contents.map(content => ({
-          title: content.title,
-          type: content.type,
-          isPublic: content.isPublic,
-          data: content.data,
-        })),
-      };
-
-      res.status(200).json(response);
+      res.status(200).json({ message: "Course published successfuly" });
     } catch (err) {
-      console.error('Error fetching courses:', err.message);
-      return res.status(500).json({ error: err.message });
-    }
-  }
-
-  static async getAllArchivedCourses(req, res) {
-    try {
-      const archivedCourses = await archivedCourseModel.find({})
-        .populate('category')
-        .populate('instructor');
-
-      if (!archivedCourses) return res.status(404).json({ error: 'No archived courses found' });
-
-      const response = await Promise.all(
-        archivedCourses.map(async course => {
-          const archivedContentsCount = await archivedContentModel.countDocuments({ course: course._id });
-          return {
-            _id: course._id,
-            title: course.title,
-            description: course.description,
-            category: course.category.name,
-            instructor: `${course.instructor.firstName} ${course.instructor.lastName}`,
-            contents: archivedContentsCount,
-            createdAt: format(new Date(course.createdAt), 'd-M-yyyy'),
-            updatedAt: format(new Date(course.updatedAt), 'd-M-yyyy'),
-            archivedAt: format(new Date(course.archivedAt), 'd-M-yyyy'),
-          }
-        }));
-      const totalArchivedCourses = await archivedCourseModel.countDocuments();
-
-      res.status(200).json({ total: totalArchivedCourses, archivedCourses: response });
-    } catch (err) {
-      console.error('Error fetching archived courses:', err.message);
+      console.error('Error publishing course:', err.message);
       return res.status(500).json({ error: err.message });
     }
   }
