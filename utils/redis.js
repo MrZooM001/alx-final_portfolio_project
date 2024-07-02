@@ -1,10 +1,25 @@
 import { createClient } from 'redis';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const RDS_USER = process.env.REDIS_USER;
+const RDS_PASSWORD = process.env.RDS_PASSWORD;
+const RDS_HOST = process.env.RDS_HOST;
+const RDS_PORT = process.env.RDS_PORT;
 
 class RedisClient {
   constructor() {
     this.client = createClient({
-      url: 'redis://localhost:6379',
+      password: RDS_PASSWORD,
+      socket: {
+        host: RDS_HOST,
+        port: RDS_PORT
+      }
     });
+
+    // hhazem0010
+    // JZcVH57!zYbQih7
 
     this.isConnected = false;
 
