@@ -17,10 +17,16 @@ const PORT = process.env.PORT;
 const HOST = process.env.HOST;
 
 const app = express();
-app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
+
+const corsOptions = {
+  origin: `http://${HOST}:${PORT}/`,
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
 
 const options = {
   definition: {
