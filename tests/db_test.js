@@ -1,9 +1,8 @@
-const mongoose = require('mongoose');
-const chai = require('chai');
-const { MongoMemoryServer } = require('mongodb-memory-server');
-
-const { expect } = chai;
-const User = require('../models/UserModel');
+import mongoose from 'mongoose';
+import { expect } from 'chai';
+import { MongoMemoryServer } from 'mongodb-memory-server';
+import { format } from 'date-fns';
+import User from '../models/UserModel.js';
 
 describe('MongoDB Tests', () => {
   let mongoServer;
@@ -20,7 +19,7 @@ describe('MongoDB Tests', () => {
   });
 
   it('should create a user in MongoDB', async () => {
-    const user = new User({ email: 'test@example.com', password: 'password' });
+    const user = new User({ email: 'test@example.com', password: 'password', dateOfBirth: format(Date('19-6-1989'), 'd-M-yyyy') });
     const savedUser = await user.save();
     expect(savedUser.email).to.equal('test@example.com');
   });

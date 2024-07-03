@@ -14,4 +14,10 @@ usersRouter.put('/update-password', verifyAccessToken, UsersController.updatePas
 
 usersRouter.get('/enrolled-courses', verifyAccessToken, EnrollmentController.getEnrolledCoursesByUser);
 
+// Get all courses created by the current user as instructor, including private courses.
+usersRouter.get('/my-courses', verifyAccessToken, UsersController.getCreatedCoursesByCurrentInstructor);
+
+// Get all courses created by the current user as instructor, including private courses.
+usersRouter.get('/my-courses/:courseId', verifyAccessToken, UsersController.getCreatedCourseByCurrentInstructorAndCourseId);
+
 export default usersRouter;

@@ -1,12 +1,16 @@
 import { format } from 'date-fns';
-import {
-  validateRegisterUserSchema, validateUpdateUserSchema, validateUpdatePasswordSchema
-} from '../helpers/schemaValidationHelpers.js';
 import { signAccessToken, signRefreshToken } from '../helpers/jwtAuthHelpers.js';
 import userModel from '../models/UserModel.js';
+import courseModel from '../models/CourseModel.js';
+import contentModel from '../models/ContentModel.js';
+import categoryModel from '../models/CategoryModel.js';
 import { getActiveSessions } from '../helpers/sessionHelpers.js';
 import { chechPagination } from '../helpers/checkPaginationHelper.js';
-import redisClient from '../utils/redis.js';
+import {
+  validateRegisterUserSchema,
+  validateUpdateUserSchema,
+  validateUpdatePasswordSchema
+} from '../helpers/schemaValidationHelpers.js';
 
 
 
@@ -246,6 +250,167 @@ class UsersController {
       });
     } catch (err) {
       console.error('Error fetching users:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  static async getCreatedCoursesByCurrentInstructor(req, res) {
+    try {
+      const userId = req.user._id;
+      const user = await userModel.findById(userId);
+      if (!user) {
+        return res.status(401).json({ error: 'User not found' });
+      }
+
+      const { title, category, sortBy, sortOrder } = req.query;
+      const { page, limit } = chechPagination(req.query.page, req.query.limit)
+
+      let totalCourses = await courseModel.countDocuments({ instructor: user._id });
+      if (totalCourses === 0) {
+        return res.status(404).json({ error: 'No courses found' });
+      }
+
+      const matchQuery = { instructor: user._id };
+
+      if (title) {
+        matchQuery.$or = [
+          { title: { $regex: title, $options: 'i' } },
+          { description: { $regex: title, $options: 'i' } }
+        ];
+      }
+
+      const sortField = sortBy || 'createdAt';
+      const sortDirection = sortOrder === 'asc' ? 1 : -1;
+
+      const atomicOptions = [
+        { $match: matchQuery },
+        { $sort: { [sortField]: sortDirection } },
+        { $skip: (page - 1) * limit },
+        { $limit: limit },
+        { $lookup: { from: 'categories', localField: 'category', foreignField: '_id', as: 'category' } },
+        { $lookup: { from: 'users', localField: 'instructor', foreignField: '_id', as: 'instructor' } },
+        { $unwind: '$category' },
+        { $unwind: '$instructor' },
+        {
+          $project: {
+            _id: 1,
+            title: 1,
+            description: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            isPublic: 1,
+            'category.name': 1,
+            'instructor.firstName': 1,
+            'instructor.lastName': 1,
+            contents: { $size: '$contents' }
+          }
+        },
+      ];
+
+      if (category) {
+        const catRegex = new RegExp(category, 'i');
+        atomicOptions.push({
+          $match: {
+            $or: [
+              { 'category.name': catRegex }
+            ]
+          }
+        });
+      }
+
+      atomicOptions.push({
+        $facet: {
+          totalCourses: [{ $count: 'count' }],
+          courses: [
+            { $skip: (page - 1) * limit },
+            { $limit: limit }
+          ]
+        }
+      });
+
+      const results = await courseModel.aggregate(atomicOptions);
+
+      const totalFound = results[0].totalCourses[0] ? results[0].totalCourses[0].count : 0;
+      const courses = results[0].courses;
+
+      if (!courses || !courses.length) {
+        return res.status(404).json({ error: 'No courses matches your search' });
+      }
+
+      const response = await Promise.all(
+        courses.map(async course => {
+          const contentCount = await contentModel.countDocuments({ course: course._id });
+          return {
+            _id: course._id,
+            title: course.title,
+            description: course.description,
+            category: course.category.name,
+            instructor: `${course.instructor.firstName} ${course.instructor.lastName}`,
+            contents: contentCount,
+            isPublic: course.isPublic,
+            createdAt: format(Date(course.createdAt), 'd-M-yyyy'),
+            updatedAt: format(Date(course.updatedAt), 'd-M-yyyy'),
+          }
+        }));
+
+      const cachedData = {
+        totalFound,
+        coursesFound: response
+      };
+
+      res.status(200).json({
+        currentPage: page,
+        totalPages: Math.ceil(totalCourses / limit),
+        totalCourses,
+        courses: cachedData
+      });
+    } catch (err) {
+      console.error('Error fetching courses:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  // Get course by ID
+  static async getCreatedCourseByCurrentInstructorAndCourseId(req, res) {
+    try {
+      const userId = req.user._id;
+      const user = await userModel.findById(userId);
+      if (!user) {
+        return res.status(401).json({ error: 'User not found' });
+      }
+
+      const courseId = req.params.courseId;
+
+      const course = await courseModel.findOne({ _id: courseId, instructor: user._id })
+        .populate('category')
+        .populate('instructor')
+        .populate('contents');
+
+      if (!course) return res.status(404).json({ error: 'Course not found' });
+
+      const contents = await contentModel.find({ course: courseId });
+
+      const response = {
+        _id: course._id,
+        title: course.title,
+        description: course.description,
+        category: course.category.name,
+        instructor: `${course.instructor.firstName} ${course.instructor.lastName}`,
+        createdAt: format(new Date(course.createdAt), 'd-M-yyyy'),
+        updatedAt: format(new Date(course.updatedAt), 'd-M-yyyy'),
+        isPublic: course.isPublic,
+        contents: contents.map(content => ({
+          _id: content._id,
+          title: content.title,
+          type: content.type,
+          isPublic: content.isPublic,
+          data: content.data,
+        })),
+      };
+
+      res.status(200).json(response);
+    } catch (err) {
+      console.error('Error fetching courses:', err.message);
       return res.status(500).json({ error: err.message });
     }
   }

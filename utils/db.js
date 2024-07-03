@@ -7,9 +7,9 @@ dotenv.config();
 
 const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
-const DB_NAME = process.env.DB_DATABASE;
+const DB_NAME = process.env.DB_NAME;
 
-const mongoUri = `mongodb+srv://${DB_USER}:${DB_PASSWORD}@hazem0010.hfwkmoz.mongodb.net/?retryWrites=true&w=majority&appName=hazem0010`
+const mongoUri = `mongodb+srv://${DB_USER}:${DB_PASSWORD}@hhazem0010.hfwkmoz.mongodb.net/${DB_NAME}`
 
 class DBClient {
   constructor() {

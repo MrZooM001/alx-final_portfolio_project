@@ -2,37 +2,40 @@ import { format } from 'date-fns';
 import redisClient from '../utils/redis.js';
 import courseModel from '../models/CourseModel.js';
 import contentModel from '../models/ContentModel.js';
+import enrollmentModel from '../models/EnrollmentModel.js';
 import categoryModel from '../models/CategoryModel.js';
 import archivedCourseModel from '../models/ArchivedCourseModel.js';
 import archivedContentModel from '../models/ArchivedContentModel.js';
 import { chechPagination } from '../helpers/checkPaginationHelper.js';
+import { isAdminOrEnrolled } from '../helpers/userIsAdminOrEnrolledHelper.js'
 
 class QueryController {
+  //Get all published courses
   static async getAllCourses(req, res) {
     try {
       const { title, instructor, category } = req.query;
-      const { page, limit } = chechPagination(req.query.page, req.query.limit)
+      const { page = 1, limit = 10 } = chechPagination(req.query.page, req.query.limit)
 
       const cacheKey = `courses:${page}:${limit}:${title || ''}:${instructor || ''}`;;
 
-      let cachedCourses = await redisClient.get(cacheKey);
 
       let totalCourses = await courseModel.countDocuments({ isPublic: true });
       if (totalCourses === 0) {
         return res.status(404).json({ error: 'No courses found' });
       }
 
-      const cachedTotalCourses = await redisClient.get('totalCourses');
+      // const cachedTotalCourses = await redisClient.get('totalCourses');
+      // let cachedCourses = await redisClient.get(cacheKey);
 
-      if (cachedCourses && cachedTotalCourses === totalCourses) {
-        cachedCourses = JSON.parse(cachedCourses);
-        return res.status(200).json({
-          currentPage: page,
-          totalPages: Math.ceil(cachedCourses.totalCourses / limit),
-          totalCourses: cachedCourses.totalCourses,
-          courses: cachedCourses.courses
-        });
-      }
+      // if (cachedCourses && cachedTotalCourses === totalCourses) {
+      //   cachedCourses = JSON.parse(cachedCourses);
+      //   return res.status(200).json({
+      //     currentPage: page,
+      //     totalPages: Math.ceil(cachedCourses.totalCourses / limit),
+      //     totalCourses: cachedCourses.totalCourses,
+      //     courses: cachedCourses.courses
+      //   });
+      // }
 
       const matchQuery = { isPublic: true };
 
@@ -145,9 +148,14 @@ class QueryController {
     }
   }
 
+  // Get course by ID
   static async getCourseById(req, res) {
     try {
+      const userId = req.user._id;
+      const userRole = req.user.role;
       const courseId = req.params.courseId;
+
+      const isAuthorized = await isAdminOrEnrolled(userRole, userId, courseId);
 
       const course = await courseModel.findById(courseId)
         .populate('category')
@@ -179,13 +187,18 @@ class QueryController {
       res.status(200).json(response);
     } catch (err) {
       console.error('Error fetching courses:', err.message);
-      return res.status(500).json({ error: err.message });
+      return res.status(err.statusCode).json({ error: err.message });
     }
   }
 
+  // Get all contents for a course by ID
   static async getAllContentForCourse(req, res) {
     try {
+      const userId = req.user._id;
+      const userRole = req.user.role;
       const courseId = req.params.courseId;
+
+      const isAuthorized = await isAdminOrEnrolled(userRole, userId, courseId);
 
       const course = await courseModel.findById(courseId)
         .populate('category')
@@ -210,55 +223,41 @@ class QueryController {
       res.status(200).json(response);
     } catch (err) {
       console.error('Error fetching courses:', err.message);
-      return res.status(500).json({ error: err.message });
+      return res.status(err.statusCode).json({ error: err.message });
     }
   }
 
+  // Get course content by Content ID
   static async getContentById(req, res) {
     try {
+      const userId = req.user._id;
+      const userRole = req.user.role;
       const { courseId, contentId } = req.params;
-      const { title, type, isPublic } = req.query;
-      let queryContent = [];
 
+      const isAuthorized = await isAdminOrEnrolled(userRole, userId, courseId);
 
-      const course = await courseModel.findById(courseId).populate('contents');
-      if (!course) return res.status(404).json({ error: 'Course not found' });
-
-      const content = await contentModel.findById(contentId);
-      if (!content) return res.status(404).json({ error: 'Content not found' });
+      const content = await contentModel.findOne({ _id: contentId, course: courseId });
+      if (!content) {
+        return res.status(404).json({ error: 'Course/Content not found' });
+      }
 
       const response = {
         _id: content._id,
+        course: content.course,
         title: content.title,
         type: content.type,
         isPublic: content.isPublic,
-        course: content.course,
         data: content.data,
       };
 
-      // TODO:
-      // Add search query parameters
-      // by title, type and isPublic
-      queryContent = [...response];
-
-      if (title) {
-        const queryWords = title.split(' ').map(word => word.toLowerCase());
-        queryContent = queryContent.filter(content =>
-          queryWords.every(word => content.title.toLowerCase().includes(word)));
-      }
-
-      if (type) {
-        queryContent = queryContent.filter(content => content.type === type);
-      }
-
-
-      res.status(200).json(queryContent);
+      res.status(200).json({ content: response });
     } catch (err) {
       console.error('Error fetching courses:', err.message);
-      return res.status(500).json({ error: err.message });
+      return res.status(err.statusCode).json({ error: err.message });
     }
   }
 
+  // Get all archived courses created by the logged in user as instructor
   static async getArchivedCoursesByInstructor(req, res) {
     try {
       const userRole = req.user.role;
@@ -298,80 +297,61 @@ class QueryController {
     }
   }
 
+  // Get archived course by ID
   static async getArchivedCourseById(req, res) {
-    // try {
-    const userRole = req.user.role;
-    if (!['instructor', 'admin'].includes(userRole)) {
-      return res.status(401).json({ error: 'Access is denied' });
+    try {
+      const userRole = req.user.role;
+      if (!['instructor', 'admin'].includes(userRole)) {
+        return res.status(401).json({ error: 'Access is denied' });
+      }
+
+      const courseId = req.params.courseId;
+      const userId = req.user._id;
+
+      let archivedCourse = [];
+
+      if (userRole === 'admin') {
+        archivedCourse = await archivedCourseModel.findOne({ _id: courseId })
+          .populate('category')
+          .populate('instructor')
+          .populate('contents');
+      } else {
+        archivedCourse = await archivedCourseModel.findOne({ _id: courseId, instructor: userId })
+          .populate('category')
+          .populate('instructor')
+          .populate('contents');
+      }
+
+      if (!archivedCourse || archivedCourse.length === 0) return res.status(404).json({ error: 'Course not found' });
+
+      const contents = await archivedContentModel.find({ course: courseId });
+      if (!contents) return res.status(404).json({ error: 'Content not found' });
+
+      const response = {
+        _id: archivedCourse._id,
+        title: archivedCourse.title,
+        description: archivedCourse.description,
+        category: archivedCourse.category.name,
+        instructor: `${archivedCourse.instructor.firstName} ${archivedCourse.instructor.lastName}`,
+        createdAt: format(new Date(archivedCourse.createdAt), 'd-M-yyyy'),
+        updatedAt: format(new Date(archivedCourse.updatedAt), 'd-M-yyyy'),
+        isPublic: archivedCourse.isPublic,
+        contents: contents.map(content => ({
+          title: content.title,
+          type: content.type,
+          isPublic: content.isPublic,
+          data: content.data,
+        })),
+      };
+
+      res.status(200).json(response);
+    } catch (err) {
+      console.error('Error fetching courses:', err.message);
+      return res.status(500).json({ error: err.message });
     }
-
-    const courseId = req.params.courseId;
-    const userId = req.user._id;
-
-    let archivedCourse = [];
-
-    if (userRole === 'admin') {
-      archivedCourse = await archivedCourseModel.findOne({ _id: courseId })
-        .populate('category')
-        .populate('instructor')
-        .populate('contents');
-
-      console.log('################ DEBUG ################')
-      console.log('1- archivedCourse', archivedCourse);
-      console.log('################ End DEBUG ################')
-    } else {
-      archivedCourse = await archivedCourseModel.findOne({ _id: courseId, instructor: userId })
-        .populate('category')
-        .populate('instructor')
-        .populate('contents');
-
-      console.log('################ DEBUG ################')
-      console.log('2- archivedCourse', archivedCourse);
-      console.log('################ End DEBUG ################')
-    }
-
-    if (!archivedCourse || archivedCourse.length === 0) return res.status(404).json({ error: 'Course not found' });
-
-    const contents = await archivedContentModel.find({ course: courseId });
-    if (!contents) return res.status(404).json({ error: 'Content not found' });
-
-    console.log('################ DEBUG ################')
-    console.log('3- archivedCourse.category.name:', archivedCourse.category.name);
-    console.log('################ End DEBUG ################')
-
-    console.log('################ DEBUG ################')
-    console.log('4- archivedCourse.instructor.firstName:', archivedCourse.instructor.firstName);
-    console.log('################ End DEBUG ################')
-
-    console.log('################ DEBUG ################')
-    console.log('5- contents:', contents);
-    console.log('################ End DEBUG ################')
-
-
-    const response = {
-      _id: archivedCourse._id,
-      title: archivedCourse.title,
-      description: archivedCourse.description,
-      category: archivedCourse.category.name,
-      instructor: `${archivedCourse.instructor.firstName} ${archivedCourse.instructor.lastName}`,
-      createdAt: format(new Date(archivedCourse.createdAt), 'd-M-yyyy'),
-      updatedAt: format(new Date(archivedCourse.updatedAt), 'd-M-yyyy'),
-      isPublic: archivedCourse.isPublic,
-      contents: contents.map(content => ({
-        title: content.title,
-        type: content.type,
-        isPublic: content.isPublic,
-        data: content.data,
-      })),
-    };
-
-    res.status(200).json(response);
-    // } catch (err) {
-    //   console.error('Error fetching courses:', err.message);
-    //   return res.status(500).json({ error: err.message });
-    // }
   }
 
+  // Get all archived courses
   static async getAllArchivedCourses(req, res) {
     try {
       const archivedCourses = await archivedCourseModel.find({})

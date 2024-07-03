@@ -7,19 +7,20 @@ import QueryController from '../controllers/QueryController.js';
 
 const adminRouter = express.Router();
 
-// Delete a user
-adminRouter.delete('/users/:userId/delete', verifyAccessToken, checkUserRole, UsersController.deleteUser);
+// Get all users
+adminRouter.get('/users', verifyAccessToken, checkUserRole, UsersController.getAllUsers);
 
 // toggle suspend user
 adminRouter.post('/users/:userId/toggle-suspend', verifyAccessToken, checkUserRole, UsersController.suspendUser);
 
-// Get all users
-adminRouter.get('/users', verifyAccessToken, checkUserRole, UsersController.getAllUsers);
+// Delete a user
+adminRouter.delete('/users/:userId/delete', verifyAccessToken, checkUserRole, UsersController.deleteUser);
+
+// Create bulk of users at once
+adminRouter.post('/users/register-bulk', UsersController.registerBulkUsers);
 
 // Get all archived courses
 adminRouter.get('/archive', verifyAccessToken, checkUserRole, QueryController.getAllArchivedCourses);
-
-adminRouter.post('/users/register-bulk', UsersController.registerBulkUsers);
 
 // get active users count as statistics from Redis cache
 adminRouter.get('/active-users', verifyAccessToken, UsersController.getActiveUsers);
