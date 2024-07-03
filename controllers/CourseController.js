@@ -253,6 +253,39 @@ class CourseController {
       return res.status(500).json({ error: err.message });
     }
   }
+  
+  static async unpublishCourse(req, res) {
+    try {
+      const userRole = req.user.role;
+      if (!['instructor', 'admin'].includes(userRole)) {
+        return res.status(401).json({ error: 'Unauthorized, Access is denied' });
+      }
+
+      const courseId = req.params.courseId;
+
+      if (userRole !== 'admin') {
+        if (req.user._id !== course.instructor.toString()) {
+          return res.status(403).json({ error: 'This is not your course to update!' });
+        }
+      }
+
+      const course = await courseModel
+        .findOneAndUpdate(
+          { _id: courseId },
+          {
+            $set: { isPublic: false }
+          },
+          { new: true }
+        );
+
+      if (!course) return res.status(404).json({ error: 'Course not found' });
+
+      res.status(200).json({ message: "Course unpublished successfuly" });
+    } catch (err) {
+      console.error('Error publishing course:', err.message);
+      return res.status(500).json({ error: err.message });
+    }
+  }
 
 
 }

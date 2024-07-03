@@ -5,7 +5,6 @@ import { checkUserRole } from '../middlewares/checkUserRoleMiddleware.js';
 import CourseController from '../controllers/CourseController.js';
 import QueryController from '../controllers/QueryController.js';
 
-
 const adminRouter = express.Router();
 
 // Delete a user
@@ -22,7 +21,7 @@ adminRouter.get('/archive', verifyAccessToken, checkUserRole, QueryController.ge
 
 adminRouter.post('/users/register-bulk', UsersController.registerBulkUsers);
 
-// // Restore archived course by course ID
-// adminRouter.post('/archive/:courseId/restore', verifyAccessToken, checkUserRole, CourseController.restoreCourse);
+// get active users count as statistics from Redis cache
+adminRouter.get('/active-users', verifyAccessToken, UsersController.getActiveUsers);
 
 export default adminRouter;

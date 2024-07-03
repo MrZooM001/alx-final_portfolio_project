@@ -65,3 +65,5 @@ app.use('/api/docs', swaggerUI.serve, swaggerUI.setup(specs));
 app.listen(PORT, () => {
   console.log(`NodeJS Server is listening on port ${PORT}`);
 });
+
+export default app;
