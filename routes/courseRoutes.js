@@ -21,7 +21,7 @@ courseRouter.post('/create', verifyAccessToken, CourseController.createCourse);
 
 courseRouter.post('/:courseId/add-content', verifyAccessToken, ContentController.addContentToCourse);
 
-courseRouter.post('/:courseId/update', verifyAccessToken, CourseController.updateCourse);
+courseRouter.put('/:courseId/update', verifyAccessToken, CourseController.updateCourse);
 
 courseRouter.delete('/:courseId/full-delete', verifyAccessToken, CourseController.fullDeleteCourse);
 
@@ -30,5 +30,9 @@ courseRouter.delete('/:courseId/delete', verifyAccessToken, CourseController.del
 courseRouter.post('/:courseId/enroll', verifyAccessToken, EnrollmentController.enrollUserInCourse);
 
 courseRouter.post('/:courseId/disenroll', verifyAccessToken, EnrollmentController.disenrollFromCourse);
+
+courseRouter.put('/:courseId/publish', verifyAccessToken, CourseController.publishCourse);
+
+courseRouter.put('/:courseId/unpublish', verifyAccessToken, CourseController.unpublishCourse);
 
 export default courseRouter;

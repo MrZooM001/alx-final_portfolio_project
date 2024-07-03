@@ -3,8 +3,6 @@ import AppController from '../controllers/AppController.js';
 
 const appRouter = express.Router();
 
-
-
 // Homepage route include welcome message
 appRouter.get('/', async (req, res) => {
   res.status(200).json({

@@ -330,6 +330,20 @@
  *   name: API-Admin
  *   description: API for Admins only to manage restricted endpoints.
  */
+
+/**
+ * @swagger
+ * tags:
+ *   name: Archive
+ *   description: The archived courses management API
+ */
+
+/**
+ * @swagger
+ * tags:
+ *   name: Authentication
+ *   description: Authentication and Authorization for the API.
+ */
 //#endregion
 
 //#region Root Endpoints
@@ -457,7 +471,7 @@
  *        $ref: '#/components/schemas/Error'
  *
  * /users/update:
- *  post:
+ *  put:
  *   summary: Update info /not password/ for the current logged in user.
  *   tags: [Users]
  *   security:
@@ -503,7 +517,7 @@
  *        $ref: '#/components/schemas/Error'
  *
  * /users/update-password:
- *  post:
+ *  put:
  *   summary: Update password only for the current logged in user.
  *   tags: [Users]
  *   security:
@@ -544,7 +558,7 @@
  *        $ref: '#/components/schemas/Error'
  *
  * /users/enrolled-courses:
- *  post:
+ *  get:
  *   summary: List of courses that current logged in user has beed enrolled into.
  *   tags: [Users]
  *   security:
@@ -569,7 +583,6 @@
  *       schema:
  *        $ref: '#/components/schemas/Error'
  * 
- * 
  */
 //#endregion
 
@@ -578,7 +591,7 @@
  * @swagger
  * /courses/:
  *  get:
- *   summary: Get a list of all published courses, including search queries.
+ *   summary: Get a list of all published courses, including search queries (public endpoint)
  *   tags: [Courses]
  *   parameters:
  *    - in: query
@@ -618,7 +631,7 @@
  *
  * /courses/{courseId}:
  *   get:
- *     summary: Get course by ID
+ *     summary: Get a course by ID (public endpoint)
  *     tags: [Courses]
  *     parameters:
  *       - in: path
@@ -710,11 +723,11 @@
  *             examples:
  *               NotFound:
  *                 value:
- *                   message: "Content not found"
+ *                   error: "Content not found"
  * 
  * /courses/{courseId}/content/{contentId}:
  *   get:
- *     summary: Get content by ID
+ *     summary: Get content by ID, within the course by ID
  *     tags: [Courses]
  *     parameters:
  *       - in: path
@@ -750,9 +763,7 @@
  *             examples:
  *               NotFound:
  *                 value:
- *                   status: 404
- *                   type: "Not Found"
- *                   message: "Content not found"
+ *                   error: "Content not found"
  * 
  * /courses/create:
  *   post:
@@ -797,9 +808,7 @@
  *             examples:
  *               Unauthorized:
  *                 value:
- *                   status: 401
- *                   type: "Unauthorized"
- *                   message: "Access token is missing or invalid"
+ *                   error: "Access token is missing or invalid"
  *  
  * /courses/{courseId}/add-content:
  *   post:
@@ -860,12 +869,10 @@
  *             examples:
  *               Unauthorized:
  *                 value:
- *                   status: 401
- *                   type: "Unauthorized"
- *                   message: "Access token is missing or invalid"
+ *                   error: "Access token is missing or invalid"
  * 
  * /courses/{courseId}/update:
- *   post:
+ *   put:
  *     summary: Update a course
  *     tags: [Courses]
  *     security:
@@ -928,15 +935,13 @@
  *             examples:
  *               Unauthorized:
  *                 value:
- *                   status: 401
- *                   type: "Unauthorized"
- *                   message: "Access token is missing or invalid" 
+ *                   error: "Access token is missing or invalid" 
  * 
  * 
  * 
  * /courses/{courseId}/full-delete:
  *   delete:
- *     summary: Fully delete a course
+ *     summary: Fully and permanent delete the course
  *     tags: [Courses]
  *     security:
  *       - bearerAuth: []
@@ -958,13 +963,11 @@
  *             examples:
  *               Unauthorized:
  *                 value:
- *                   status: 401
- *                   type: "Unauthorized"
- *                   message: "Access token is missing or invalid"
+ *                   error: "Access token is missing or invalid"
 
  * /courses/{courseId}/delete:
  *   delete:
- *     summary: Soft delete a course
+ *     summary: Soft delete a course, Archive the course instead of delete, it can be restored later by the instructor or the admin
  *     tags: [Courses]
  *     security:
  *       - bearerAuth: []
@@ -984,7 +987,7 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   example: "Course deleted successfully"
+ *                   message: "Course deleted successfully"
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -994,9 +997,7 @@
  *             examples:
  *               Unauthorized:
  *                 value:
- *                   status: 401
- *                   type: "Unauthorized"
- *                   message: "Access token is missing or invalid"
+ *                   error: "Access token is missing or invalid"
  * 
  * /courses/{courseId}/enroll:
  *   post:
@@ -1049,9 +1050,7 @@
  *             examples:
  *               Unauthorized:
  *                 value:
- *                   status: 401
- *                   type: "Unauthorized"
- *                   message: "Access token is missing or invalid"
+ *                   error: "Access token is missing or invalid"
  * 
  * /courses/{courseId}/disenroll:
  *   post:
@@ -1093,9 +1092,59 @@
  *             examples:
  *               Unauthorized:
  *                 value:
- *                   status: 401
- *                   type: "Unauthorized"
- *                   message: "Access token is missing or invalid" 
+ *                   error: "Access token is missing or invalid" 
+ * 
+ * /courses/{courseId}/publish:
+ *   put:
+ *     summary: Publish a course
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: courseId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       "200":
+ *         description: Course published successfully
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Error"
+ *             examples:
+ *               Unauthorized:
+ *                 value:
+ *                   error: "Access token is missing or invalid" 
+ * 
+ * /courses/{courseId}/unpublish:
+ *   put:
+ *     summary: Unpublish a course, only done by the instructor of the course of admin 
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: courseId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       "200":
+ *         description: Course unpublished successfully
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Error"
+ *             examples:
+ *               Unauthorized:
+ *                 value:
+ *                   error: "Access token is missing or invalid" 
  * 
  */
 //#endregion
@@ -1142,6 +1191,264 @@
  *       schema:
  *        $ref: '#/components/schemas/Error'
  * 
+ * /api-admin/users/{userId}/delete:
+ *   delete:
+ *     summary: Delete a user
+ *     tags: [API-Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       "204":
+ *         description: User deleted successfully
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Error"
+ *             examples:
+ *               Unauthorized:
+ *                 value:
+ *                   error: "Access token is missing or invalid" 
+ * 
+ * /api-admin/users/{userId}/toggle-suspend:
+ *   post:
+ *     summary: Toggle suspend a user
+ *     tags: [API-Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       "200":
+ *         description: User suspension toggled successfully
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Error"
+ *             examples:
+ *               Unauthorized:
+ *                 value:
+ *                   error: "Access token is missing or invalid" 
+ * 
+ * /api-admin/archive:
+ *   get:
+ *     summary: Get all archived courses
+ *     tags: [API-Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       "200":
+ *         description: List of all archived courses
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: "#/components/schemas/Course"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Error"
+ *             examples:
+ *               Unauthorized:
+ *                 value:
+ *                   error: "Access token is missing or invalid" 
+ * 
+ * /api-admin/users/register-bulk:
+ *   post:
+ *     summary: Register bulk users
+ *     tags: [API-Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: array
+ *             items:
+ *               $ref: "#/components/schemas/User"
+ *     responses:
+ *       "200":
+ *         description: Users registered successfully
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Error"
+ *             examples:
+ *               Unauthorized:
+ *                 value:
+ *                   error: "Access token is missing or invalid" 
+ * 
+ */
+//#endregion
+
+//#region Archive Enpoints
+/**
+ * @swagger
+ * /archive:
+ *   get:
+ *     summary: Get archived courses by instructor
+ *     tags: [Archive]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       "200":
+ *         description: List of archived courses
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: "#/components/schemas/Course"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Error"
+ *             examples:
+ *               Unauthorized:
+ *                 value:
+ *                   error: "Access token is missing or invalid"
+ * 
+ * /archive/{courseId}:
+ *   get:
+ *     summary: Get archived course by ID
+ *     tags: [Archive]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: courseId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       "200":
+ *         description: Archived course details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Course"
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Error"
+ *             examples:
+ *               Unauthorized:
+ *                 value:
+ *                   error: "Access token is missing or invalid"
+ * 
+ * /archive/{courseId}/restore:
+ *   post:
+ *     summary: Restore archived course by ID
+ *     tags: [Archive]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: courseId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       "200":
+ *         description: Course restored successfully
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Error"
+ *             examples:
+ *               Unauthorized:
+ *                 value:
+ *                   error: "Access token is missing or invalid"
+ */
+//#endregion
+
+//#region Authentication Endpoints
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Login a user
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       "200":
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                 refreshToken:
+ *                   type: string
+ *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Error"
+ *             examples:
+ *               Unauthorized:
+ *                 value:
+ *                   error: "Invalid credentials"
+ * 
+ * /auth/logout:
+ *   delete:
+ *     summary: Logout a user
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       "204":
+ *         description: Logout successful
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Error"
+ *             examples:
+ *               Unauthorized:
+ *                 value:
+ *                   error: "Access token is missing or invalid" 
  * 
  */
 //#endregion
