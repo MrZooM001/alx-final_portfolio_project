@@ -17,7 +17,7 @@ class UsersController {
       const validation = await validateRegisterUserSchema.validateAsync(req.body);
 
       const userExists = await userModel.findOne({ email });
-      if (userExists) return res.status(400).json({ error: 'email already exists' });
+      if (userExists) return res.status(409).json({ error: 'Email already exists' });
 
       const user = new userModel({
         email: validation.email,
@@ -103,7 +103,7 @@ class UsersController {
 
       if (!updatedUser) return res.status(404).json({ error: 'User not found' });
 
-      res.status(200).json({ success: true, updatedUser });
+      res.status(200).json({ updatedUser });
     } catch (err) {
       return res.status(400).json({ error: err.message });
     }

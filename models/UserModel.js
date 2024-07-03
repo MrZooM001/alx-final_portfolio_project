@@ -7,7 +7,7 @@ const userSchema = new Schema({
   password: { type: String, required: true },
   firstName: { type: String, trim: true },
   lastName: { type: String, trim: true },
-  dateOfBirth: { type: Date },
+  dateOfBirth: { type: Date, required: true },
   role: { type: String, enum: ['student', 'instructor', 'admin'], default: 'student' },
   isSuspended: { type: Boolean, default: false },
 }, { timestamps: true });

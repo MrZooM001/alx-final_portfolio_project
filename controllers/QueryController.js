@@ -252,11 +252,6 @@ class QueryController {
       }
 
 
-
-
-
-
-
       res.status(200).json(queryContent);
     } catch (err) {
       console.error('Error fetching courses:', err.message);
