@@ -13,10 +13,10 @@ class QueryController {
   //Get all published courses
   static async getAllCourses(req, res) {
     try {
-      const { title, instructor, category } = req.query;
+      const { title, instructor, description, category } = req.query;
       const { page = 1, limit = 10 } = chechPagination(req.query.page, req.query.limit)
 
-      let totalCourses = await courseModel.countDocuments({ isPublic: true });
+      let totalCourses = await courseModel.countDocuments();
       if (totalCourses === 0) {
         return res.status(404).json({ error: 'No courses found' });
       }
@@ -26,7 +26,7 @@ class QueryController {
       if (title) {
         matchQuery.$or = [
           { title: { $regex: title, $options: 'i' } },
-          { description: { $regex: title, $options: 'i' } }
+          { description: { $regex: description, $options: 'i' } }
         ];
       }
 
@@ -90,7 +90,7 @@ class QueryController {
 
       const results = await courseModel.aggregate(atomicOptions);
 
-      totalCourses = results[0].totalCourses[0] ? results[0].totalCourses[0].count : 0;
+      const totalFound = results[0].totalCourses[0] ? results[0].totalCourses[0].count : 0;
       const courses = results[0].courses;
 
       if (!courses || !courses.length) {
@@ -113,7 +113,7 @@ class QueryController {
         }));
 
       const cachedData = {
-        totalCourses,
+        totalFound,
         courses: response
       };
 
