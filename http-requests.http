@@ -9,7 +9,7 @@ content-type: application/json
   "firstName": "Hazem",
   "lastName": "Magdy",
   "dateOfBirth": "19-6-1989",
-  "role": "instructor"
+  "role": "admin"
 }
 
 ###
@@ -30,53 +30,8 @@ content-type: application/json
 // After a successful login, Create a new course if the user is instructor
 POST https://innovative-learning-api-e73228a278b9.herokuapp.com/courses/create HTTP/1.1
 content-type: application/json
-Authorization: Bearer <....>
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Njg0ZmJmZTk3ZTZkYmRmYTdlYmIwMjEiLCJlbWFpbCI6ImhhemVtMDAxMEBnbWFpbC5jb20iLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE3MTk5OTE0NTYsImV4cCI6MTcyMDA3Nzg1NiwiYXVkIjoiNjY4NGZiZmU5N2U2ZGJkZmE3ZWJiMDIxIiwiaXNzIjoiSW5ub3ZhdGl2ZUxlYXJuaW5nUGxhdGZvcm0ifQ.Glc9ili96d6NaczQLo8Ra-sRJph0F62j_wCaRsHGipI
 
-{
-  "title": "Learn Arabic language from the real Arabs 2024",
-  "description": "We help our students to learn everything about Arabic language from the basic alphabet to the culture and everyday vocabulary.",
-  "category": "Language",
-  "contents": [
-    {
-      "title": "Introduction",
-      "type": "video",
-      "isPublic": true,
-      "data": {
-        "url": "http://example.com/learn-arabic/lesson-1",
-        "duration": "4:10 minutes",
-        "description": "Intro and overview to the course"
-    }
-    },
-    {
-      "title": "Level 1",
-      "type": "video",
-      "isPublic": true,
-      "data": {
-         "Alphabet 1": {
-           "url": "http://example.com/learn-arabic/lesson-1/alphabet-1",
-           "duration": "33:45 minutes",
-           "description": "First letter of Arabic"
-         },
-         "Alphabet 2": {
-           "url": "http://example.com/learn-arabic/lesson-1/alphabet-2",
-           "duration": "31:10 minutes",
-           "description": "Continue with Arabic alphabet"
-         }
-      }
-    },
-    {
-      "title": "Level 2",
-      "type": "article",
-      "isPublic": false,
-      "data": {
-        "title": "Write and Follow the lines",
-        "paragraph 1": "Letter Alef 'أ' ",
-        "paragraph 2": "Letter Ba'a 'ب' ",
-        "paragraph 3": "Letter Ta'a 'ت' ",
-    }
-    }
-  ]
-}
 
 
 ###

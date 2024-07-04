@@ -17,7 +17,7 @@ adminRouter.post('/users/:userId/toggle-suspend', verifyAccessToken, checkUserRo
 adminRouter.delete('/users/:userId/delete', verifyAccessToken, checkUserRole, UsersController.deleteUser);
 
 // Create bulk of users at once
-adminRouter.post('/users/register-bulk', checkUserRole, UsersController.registerBulkUsers);
+adminRouter.post('/users/register-bulk', verifyAccessToken, checkUserRole, UsersController.registerBulkUsers);
 
 // Get all archived courses
 adminRouter.get('/archive', verifyAccessToken, checkUserRole, QueryController.getAllArchivedCourses);
