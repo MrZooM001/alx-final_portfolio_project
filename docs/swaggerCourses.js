@@ -46,6 +46,8 @@
  *   get:
  *     summary: Get a course by ID (public endpoint)
  *     tags: [Courses]
+ *    security:
+ *       - Bearer: []
  *     parameters:
  *       - in: path
  *         name: courseId
@@ -93,6 +95,8 @@
  * /courses/{courseId}/content:
  *   get:
  *     summary: Get all content for a course
+ *     security:
+ *       - Bearer: []
  *     tags: [Courses]
  *     parameters:
  *       - in: path
@@ -142,6 +146,8 @@
  *   get:
  *     summary: Get content by ID, within the course by ID
  *     tags: [Courses]
+ *     security:
+ *       - Bearer: []
  *     parameters:
  *       - in: path
  *         name: courseId

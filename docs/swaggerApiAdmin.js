@@ -6,6 +6,8 @@
  *  get:
  *   summary: Get a list of all registerd users .
  *   tags: [API-Admin]
+ *   security:
+ *       - Bearer: []
  *   parameters:
  *    - in: query
  *      name: email

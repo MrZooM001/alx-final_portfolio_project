@@ -1,0 +1,109 @@
+
+// Register a new user
+POST https://innovative-learning-api-e73228a278b9.herokuapp.com/users/register HTTP/1.1
+content-type: application/json
+
+{
+  "email": "hazem@gmail.com",
+  "password": "100100",
+  "firstName": "Hazem",
+  "lastName": "Magdy",
+  "dateOfBirth": "19-6-1989",
+  "role": "instructor"
+}
+
+###
+
+
+// Login with user credentials
+POST https://innovative-learning-api-e73228a278b9.herokuapp.com/auth/login HTTP/1.1
+content-type: application/json
+
+{
+  "email": "hazem@gmail.com",
+  "password": "100100",
+}
+
+###
+
+
+// After a successful login, Create a new course if the user is instructor
+POST https://innovative-learning-api-e73228a278b9.herokuapp.com/courses/create HTTP/1.1
+content-type: application/json
+Authorization: Bearer <....>
+
+{
+  "title": "Learn Arabic language from the real Arabs 2024",
+  "description": "We help our students to learn everything about Arabic language from the basic alphabet to the culture and everyday vocabulary.",
+  "category": "Language",
+  "contents": [
+    {
+      "title": "Introduction",
+      "type": "video",
+      "isPublic": true,
+      "data": {
+        "url": "http://example.com/learn-arabic/lesson-1",
+        "duration": "4:10 minutes",
+        "description": "Intro and overview to the course"
+    }
+    },
+    {
+      "title": "Level 1",
+      "type": "video",
+      "isPublic": true,
+      "data": {
+         "Alphabet 1": {
+           "url": "http://example.com/learn-arabic/lesson-1/alphabet-1",
+           "duration": "33:45 minutes",
+           "description": "First letter of Arabic"
+         },
+         "Alphabet 2": {
+           "url": "http://example.com/learn-arabic/lesson-1/alphabet-2",
+           "duration": "31:10 minutes",
+           "description": "Continue with Arabic alphabet"
+         }
+      }
+    },
+    {
+      "title": "Level 2",
+      "type": "article",
+      "isPublic": false,
+      "data": {
+        "title": "Write and Follow the lines",
+        "paragraph 1": "Letter Alef 'أ' ",
+        "paragraph 2": "Letter Ba'a 'ب' ",
+        "paragraph 3": "Letter Ta'a 'ت' ",
+    }
+    }
+  ]
+}
+
+
+###
+
+
+// List all published courses (public endpoint)
+GET http://https://innovative-learning-api-e73228a278b9.herokuapp.com/courses HTTP/1.1
+content-type: application/json
+
+
+###
+
+
+// List all published courses (public endpoint)
+GET  https://innovative-learning-api-e73228a278b9.herokuapp.com/courses/6685376e16a7e5eba702eb37 HTTP/1.1
+content-type: application/json
+Authorization: Bearer <....>
+
+
+###
+
+// List all published courses (public endpoint)
+PUT  http://{{$dotenv ONLINE_API_URL}}/courses/6685376e16a7e5eba702eb37/publish HTTP/1.1
+content-type: application/json
+Authorization: 
+
+
+###
+
+

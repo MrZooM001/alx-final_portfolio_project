@@ -4,7 +4,7 @@
  * @swagger
  * /auth/login:
  *   post:
- *     summary: Login a user
+ *     summary: Login a user with email and password
  *     tags: [Authentication]
  *     requestBody:
  *       required: true
