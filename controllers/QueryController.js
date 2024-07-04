@@ -26,29 +26,6 @@ class QueryController {
         ];
       }
 
-      if (instructor) {
-        const instructorRegex = new RegExp(instructor, 'i');
-        atomicOptions.push({
-          $match: {
-            $or: [
-              { 'instructor.firstName': instructorRegex },
-              { 'instructor.lastName': instructorRegex }
-            ]
-          }
-        });
-      }
-
-      if (category) {
-        const catRegex = new RegExp(category, 'i');
-        atomicOptions.push({
-          $match: {
-            $or: [
-              { 'category.name': catRegex }
-            ]
-          }
-        });
-      }
-
       const atomicOptions = [
         { $match: matchQuery },
         { $lookup: { from: 'categories', localField: 'category', foreignField: '_id', as: 'category' } },
@@ -79,6 +56,31 @@ class QueryController {
           }
         }
       ];
+
+      if (instructor) {
+        const instructorRegex = new RegExp(instructor, 'i');
+        atomicOptions.push({
+          $match: {
+            $or: [
+              { 'instructor.firstName': instructorRegex },
+              { 'instructor.lastName': instructorRegex }
+            ]
+          }
+        });
+      }
+
+      if (category) {
+        const catRegex = new RegExp(category, 'i');
+        atomicOptions.push({
+          $match: {
+            $or: [
+              { 'category.name': catRegex }
+            ]
+          }
+        });
+      }
+
+
 
       const results = await courseModel.aggregate(atomicOptions);
 
