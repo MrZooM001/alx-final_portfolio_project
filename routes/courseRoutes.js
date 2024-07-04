@@ -23,7 +23,7 @@ courseRouter.post('/:courseId/add-content', verifyAccessToken, ContentController
 
 courseRouter.put('/:courseId/update', verifyAccessToken, CourseController.updateCourse);
 
-courseRouter.delete('/:courseId/full-delete', verifyAccessToken, CourseController.fullDeleteCourse);
+courseRouter.delete('/:courseId/delete', verifyAccessToken, CourseController.fullDeleteCourse);
 
 courseRouter.delete('/:courseId/archive', verifyAccessToken, CourseController.archiveCourseById);
 

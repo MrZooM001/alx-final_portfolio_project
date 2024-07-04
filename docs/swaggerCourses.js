@@ -358,9 +358,9 @@
  * 
  * 
  * 
- * /courses/{courseId}/full-delete:
+ * /courses/{courseId}/delete:
  *   delete:
- *     summary: Fully and permanent delete the course
+ *     summary: Delete the course Permanently
  *     tags: [Courses]
  *     security:
  *       - Bearer: []
@@ -384,7 +384,7 @@
  *                 value:
  *                   error: "Access token is missing or invalid"
 
- * /courses/{courseId}/delete:
+ * /courses/{courseId}/archive:
  *   delete:
  *     summary: Soft delete a course, Archive the course instead of delete, it can be restored later by the instructor or the admin
  *     tags: [Courses]
@@ -398,7 +398,7 @@
  *           type: string
  *     responses:
  *       "200":
- *         description: Course deleted successfully
+ *         description: Course archived successfully
  *         content:
  *           application/json:
  *             schema:
@@ -406,7 +406,7 @@
  *               properties:
  *                 message:
  *                   type: string
- *                   message: "Course deleted successfully"
+ *                   message: "Course archived successfully"
  *       "401":
  *         description: Unauthorized
  *         content:

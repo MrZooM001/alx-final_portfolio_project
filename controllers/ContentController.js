@@ -9,7 +9,7 @@ class ContentController {
     try {
       const userRole = req.user.role;
       if (!['instructor', 'admin'].includes(userRole)) {
-        return res.status(401).json({ error: 'You need to be a teacher to create a content!' });
+        return res.status(401).json({ error: 'You need to be a instructor to create a content!' });
       }
 
       const courseId = req.params.courseId;

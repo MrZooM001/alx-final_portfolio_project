@@ -70,7 +70,7 @@ class CourseController {
     try {
       const userRole = req.user.role;
       if (!['instructor', 'admin'].includes(userRole)) {
-        return res.status(401).json({ error: 'You need to be a teacher to update a course!' });
+        return res.status(401).json({ error: 'You need to be a instructor to update a course!' });
       }
 
       const courseId = req.params.courseId;
@@ -137,7 +137,7 @@ class CourseController {
     try {
       const userRole = req.user.role;
       if (!['instructor', 'admin'].includes(userRole)) {
-        return res.status(401).json({ error: 'You need to be a teacher to delete a course!' });
+        return res.status(401).json({ error: 'You need to be a instructor to archived a course!' });
       }
 
       const courseId = req.params.courseId;
@@ -151,12 +151,12 @@ class CourseController {
       }
 
       const archiveCourse = await archiveCourseHelper(courseId);
-      if (!archiveCourse) return res.status(500).json({ error: 'Course not deleted' });
+      if (!archiveCourse) return res.status(500).json({ error: 'Course not archived' });
 
       await contentModel.deleteMany({ course: courseId });
       await courseModel.findByIdAndDelete(courseId);
 
-      res.status(200).json({ message: "Course deleted successfuly" });
+      res.status(200).json({ message: "Course archived successfuly" });
     } catch (err) {
       console.error('Error deleting course:', err.message);
       return res.status(500).json({ error: err.message });
@@ -167,7 +167,7 @@ class CourseController {
     try {
       const userRole = req.user.role;
       if (!['instructor', 'admin'].includes(userRole)) {
-        return res.status(401).json({ error: 'You need to be a teacher to delete a course!' });
+        return res.status(401).json({ error: 'You need to be a instructor to delete a course!' });
       }
 
       const courseId = req.params.courseId;
@@ -198,7 +198,7 @@ class CourseController {
     try {
       const userRole = req.user.role;
       if (!['instructor', 'admin'].includes(userRole)) {
-        return res.status(401).json({ error: 'You need to be a teacher to delete a course!' });
+        return res.status(401).json({ error: 'You need to be a instructor to delete a course!' });
       }
 
       const courseId = req.params.courseId;

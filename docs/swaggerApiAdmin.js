@@ -69,6 +69,37 @@
  *                 value:
  *                   error: "Access token is missing or invalid" 
  * 
+ * /api-admin/users/{userId}/update-role:
+ *   delete:
+ *     summary: Delete a user
+ *     tags: [API-Admin]
+ *     security:
+ *       - Bearer: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *         description: User role value to be updated
+ *     responses:
+ *       "204":
+ *         description: User deleted successfully
+ *       "401":
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/Error"
+ *             examples:
+ *               Unauthorized:
+ *                 value:
+ *                   error: "Access token is missing or invalid" 
+ * 
  * /api-admin/users/{userId}/toggle-suspend:
  *   post:
  *     summary: Toggle suspend a user

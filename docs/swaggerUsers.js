@@ -188,5 +188,57 @@
  *       schema:
  *        $ref: '#/components/schemas/Error'
  * 
+ * /users/my-courses:
+ *  get:
+ *   summary: List of courses created by the current instructor user.
+ *   tags: [Users]
+ *   security:
+ *      - Bearer: []
+ *   responses:
+ *    200:
+ *     description: Array of courses that user has been created.
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/Course'
+ *    404:
+ *     description: No courses found
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/Error'
+ *    500:
+ *     description: Internal server error
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/Error'
+ * 
+ * /users/my-courses/{courseId}:
+ *  get:
+ *   summary: Get a course created by the current instructor user by ID.
+ *   tags: [Users]
+ *   security:
+ *      - Bearer: []
+ *   responses:
+ *    200:
+ *     description: a course matches the ID which user has been created.
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/Course'
+ *    404:
+ *     description: No courses found
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/Error'
+ *    500:
+ *     description: Internal server error
+ *     content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/Error'
+ * 
  */
 //#endregion
