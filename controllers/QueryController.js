@@ -84,7 +84,7 @@ class QueryController {
 
       const results = await courseModel.aggregate(atomicOptions);
 
-      const totalFound = results[0].totalCourses[0] ? results[0].totalCourses[0].count : 0;
+      let totalFound = results[0].totalCourses[0] ? results[0].totalCourses[0].count : 0;
       const courses = results[0].courses;
 
       if (!courses || !courses.length) {
