@@ -16,12 +16,7 @@ class QueryController {
       const { title, instructor, category } = req.query;
       const { page = 1, limit = 10 } = chechPagination(req.query.page, req.query.limit)
 
-      let totalCourses = await courseModel.countDocuments();
-      if (totalCourses === 0) {
-        return res.status(404).json({ error: 'No courses found' });
-      }
-
-      const matchQuery = { };
+      const matchQuery = {};
 
       if (title) {
         matchQuery.$or = [
@@ -29,31 +24,6 @@ class QueryController {
           { description: { $regex: title, $options: 'i' } }
         ];
       }
-
-      const atomicOptions = [
-        { $match: matchQuery },
-        { $sort: { createdAt: -1 } },
-        { $skip: (page - 1) * limit },
-        { $limit: limit },
-        { $lookup: { from: 'categories', localField: 'category', foreignField: '_id', as: 'category' } },
-        { $lookup: { from: 'users', localField: 'instructor', foreignField: '_id', as: 'instructor' } },
-        { $unwind: '$category' },
-        { $unwind: '$instructor' },
-        {
-          $project: {
-            _id: 1,
-            title: 1,
-            description: 1,
-            createdAt: 1,
-            updatedAt: 1,
-            'category.name': 1,
-            'instructor.firstName': 1,
-            'instructor.lastName': 1,
-            contents: { $size: '$contents' }
-          }
-        },
-      ];
-
 
       if (instructor) {
         const instructorRegex = new RegExp(instructor, 'i');
@@ -78,15 +48,36 @@ class QueryController {
         });
       }
 
-      atomicOptions.push({
-        $facet: {
-          totalCourses: [{ $count: 'count' }],
-          courses: [
-            { $skip: (page - 1) * limit },
-            { $limit: limit }
-          ]
+      const atomicOptions = [
+        { $match: matchQuery },
+        { $lookup: { from: 'categories', localField: 'category', foreignField: '_id', as: 'category' } },
+        { $lookup: { from: 'users', localField: 'instructor', foreignField: '_id', as: 'instructor' } },
+        { $unwind: '$category' },
+        { $unwind: '$instructor' },
+        {
+          $facet: {
+            totalCourses: [{ $count: 'count' }],
+            courses: [
+              { $sort: { createdAt: -1 } },
+              { $skip: (page - 1) * limit },
+              { $limit: limit },
+              {
+                $project: {
+                  _id: 1,
+                  title: 1,
+                  description: 1,
+                  createdAt: 1,
+                  updatedAt: 1,
+                  'category.name': 1,
+                  'instructor.firstName': 1,
+                  'instructor.lastName': 1,
+                  contents: { $size: '$contents' }
+                }
+              }
+            ]
+          }
         }
-      });
+      ];
 
       const results = await courseModel.aggregate(atomicOptions);
 
@@ -107,8 +98,8 @@ class QueryController {
             category: course.category.name,
             instructor: `${course.instructor.firstName} ${course.instructor.lastName}`,
             contents: contentCount,
-            createdAt: format(new Date(course.createdAt), 'd-M-yyyy'),
-            updatedAt: format(new Date(course.updatedAt), 'd-M-yyyy'),
+            createdAt: format(new Date(course.createdAt), 'D-M-YYYY'),
+            updatedAt: format(new Date(course.updatedAt), 'D-M-YYYY'),
           }
         }));
 
