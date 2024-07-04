@@ -17,6 +17,7 @@ class QueryController {
       const { page = 1, limit = 10 } = chechPagination(req.query.page, req.query.limit)
 
       const matchQuery = {};
+      const totalCourses = await courseModel.countDocuments();
 
       if (title) {
         matchQuery.$or = [
