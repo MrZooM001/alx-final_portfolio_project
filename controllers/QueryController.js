@@ -16,26 +16,10 @@ class QueryController {
       const { title, instructor, category } = req.query;
       const { page = 1, limit = 10 } = chechPagination(req.query.page, req.query.limit)
 
-      const cacheKey = `courses:${page}:${limit}:${title || ''}:${instructor || ''}`;;
-
-
       let totalCourses = await courseModel.countDocuments({ isPublic: true });
       if (totalCourses === 0) {
         return res.status(404).json({ error: 'No courses found' });
       }
-
-      // const cachedTotalCourses = await redisClient.get('totalCourses');
-      // let cachedCourses = await redisClient.get(cacheKey);
-
-      // if (cachedCourses && cachedTotalCourses === totalCourses) {
-      //   cachedCourses = JSON.parse(cachedCourses);
-      //   return res.status(200).json({
-      //     currentPage: page,
-      //     totalPages: Math.ceil(cachedCourses.totalCourses / limit),
-      //     totalCourses: cachedCourses.totalCourses,
-      //     courses: cachedCourses.courses
-      //   });
-      // }
 
       const matchQuery = { isPublic: true };
 
@@ -132,9 +116,6 @@ class QueryController {
         totalCourses,
         courses: response
       };
-
-      await redisClient.set(cacheKey, JSON.stringify(cachedData), 3600);
-      await redisClient.set('totalCourses', totalCourses.toString(), 3600);
 
       res.status(200).json({
         currentPage: page,
