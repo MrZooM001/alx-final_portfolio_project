@@ -9,7 +9,7 @@ const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
 const DB_NAME = process.env.DB_NAME;
 
-const mongoUri = `mongodb+srv://${DB_USER}:${DB_PASSWORD}@hhazem0010.hfwkmoz.mongodb.net/${DB_NAME}`
+const mongoUri = `mongodb+srv://${DB_USER}:${DB_PASSWORD}@hhazem0010.hfwkmoz.mongodb.net/ilp_lms_api_db`
 
 class DBClient {
   constructor() {
