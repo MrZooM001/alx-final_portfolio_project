@@ -98,8 +98,8 @@ class QueryController {
             category: course.category.name,
             instructor: `${course.instructor.firstName} ${course.instructor.lastName}`,
             contents: contentCount,
-            createdAt: format(new Date(course.createdAt), 'D-M-YYYY'),
-            updatedAt: format(new Date(course.updatedAt), 'D-M-YYYY'),
+            createdAt: format(new Date(course.createdAt), 'd-M-yyyy'),
+            updatedAt: format(new Date(course.updatedAt), 'd-M-yyyy'),
           }
         }));
 
