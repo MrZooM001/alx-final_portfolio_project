@@ -14,7 +14,7 @@ import archiveRouter from './routes/archiveRoutes.js';
 dotenv.config();
 
 const PORT = process.env.PORT;
-const HOST = 'https://innovative-learning-api-e73228a278b9.herokuapp.com/';
+const HOST = 'https://ilearningplatform.me/';
 
 const app = express();
 app.use(express.json());
@@ -37,7 +37,7 @@ const swaggerOptions = {
       description: 'API documentation for the Innovative Learning Platform - Learning Management System API',
       contact: {
         name: 'API Support',
-        email: 'support@ilearningplafrom.com',
+        email: 'support@ilearningplatform.me',
         url: HOST
       }
     },
