@@ -59,7 +59,7 @@ class CourseController {
 
       await savedCourse.save();
 
-      return res.status(200).json({ sucess: true, savedCourse });
+      return res.status(200).json({ sucess: true, createdCourse: savedCourse });
     } catch (err) {
       console.error('Error creating course:', err.message);
       return res.status(err.statusCode).json({ error: err.message });
@@ -70,7 +70,7 @@ class CourseController {
     try {
       const userRole = req.user.role;
       if (!['instructor', 'admin'].includes(userRole)) {
-        return res.status(401).json({ error: 'You need to be a teacher to update a course!' });
+        return res.status(401).json({ error: 'You need to be a instructor to update a course!' });
       }
 
       const courseId = req.params.courseId;
@@ -133,11 +133,11 @@ class CourseController {
     }
   }
 
-  static async deleteCourse(req, res) {
+  static async archiveCourseById(req, res) {
     try {
       const userRole = req.user.role;
       if (!['instructor', 'admin'].includes(userRole)) {
-        return res.status(401).json({ error: 'You need to be a teacher to delete a course!' });
+        return res.status(401).json({ error: 'You need to be a instructor to archived a course!' });
       }
 
       const courseId = req.params.courseId;
@@ -151,12 +151,12 @@ class CourseController {
       }
 
       const archiveCourse = await archiveCourseHelper(courseId);
-      if (!archiveCourse) return res.status(500).json({ error: 'Course not deleted' });
+      if (!archiveCourse) return res.status(500).json({ error: 'Course not archived' });
 
       await contentModel.deleteMany({ course: courseId });
       await courseModel.findByIdAndDelete(courseId);
 
-      res.status(200).json({ message: "Course deleted successfuly" });
+      res.status(200).json({ message: "Course archived successfuly" });
     } catch (err) {
       console.error('Error deleting course:', err.message);
       return res.status(500).json({ error: err.message });
@@ -167,7 +167,7 @@ class CourseController {
     try {
       const userRole = req.user.role;
       if (!['instructor', 'admin'].includes(userRole)) {
-        return res.status(401).json({ error: 'You need to be a teacher to delete a course!' });
+        return res.status(401).json({ error: 'You need to be a instructor to delete a course!' });
       }
 
       const courseId = req.params.courseId;
@@ -198,7 +198,7 @@ class CourseController {
     try {
       const userRole = req.user.role;
       if (!['instructor', 'admin'].includes(userRole)) {
-        return res.status(401).json({ error: 'You need to be a teacher to delete a course!' });
+        return res.status(401).json({ error: 'You need to be a instructor to delete a course!' });
       }
 
       const courseId = req.params.courseId;
@@ -229,6 +229,7 @@ class CourseController {
       }
 
       const courseId = req.params.courseId;
+      const course = await courseModel.findById(courseId);
 
       if (userRole !== 'admin') {
         if (req.user._id !== course.instructor.toString()) {
@@ -236,7 +237,7 @@ class CourseController {
         }
       }
 
-      const course = await courseModel
+      const updatedCourse = await courseModel
         .findOneAndUpdate(
           { _id: courseId },
           {
@@ -245,15 +246,15 @@ class CourseController {
           { new: true }
         );
 
-      if (!course) return res.status(404).json({ error: 'Course not found' });
+      if (!updatedCourse) return res.status(404).json({ error: 'Course not found' });
 
-      res.status(200).json({ message: "Course published successfuly" });
+      res.status(200).json({ message: `Course '${updatedCourse.title}' published successfuly` });
     } catch (err) {
       console.error('Error publishing course:', err.message);
       return res.status(500).json({ error: err.message });
     }
   }
-  
+
   static async unpublishCourse(req, res) {
     try {
       const userRole = req.user.role;
@@ -262,6 +263,7 @@ class CourseController {
       }
 
       const courseId = req.params.courseId;
+      const course = await courseModel.findById(courseId);
 
       if (userRole !== 'admin') {
         if (req.user._id !== course.instructor.toString()) {
@@ -269,7 +271,7 @@ class CourseController {
         }
       }
 
-      const course = await courseModel
+      const updatedCourse = await courseModel
         .findOneAndUpdate(
           { _id: courseId },
           {
@@ -278,7 +280,7 @@ class CourseController {
           { new: true }
         );
 
-      if (!course) return res.status(404).json({ error: 'Course not found' });
+      if (!updatedCourse) return res.status(404).json({ error: 'Course not found' });
 
       res.status(200).json({ message: "Course unpublished successfuly" });
     } catch (err) {

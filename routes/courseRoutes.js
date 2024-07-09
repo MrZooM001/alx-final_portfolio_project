@@ -10,11 +10,11 @@ const courseRouter = express.Router();
 
 courseRouter.get('/', QueryController.getAllCourses);
 
-courseRouter.get('/:courseId', QueryController.getCourseById);
+courseRouter.get('/:courseId', verifyAccessToken, QueryController.getCourseById);
 
-courseRouter.get('/:courseId/content', QueryController.getAllContentForCourse);
+courseRouter.get('/:courseId/content', verifyAccessToken, QueryController.getAllContentForCourse);
 
-courseRouter.get('/:courseId/content/:contentId', QueryController.getContentById);
+courseRouter.get('/:courseId/content/:contentId', verifyAccessToken, QueryController.getContentById);
 
 // Create a new course
 courseRouter.post('/create', verifyAccessToken, CourseController.createCourse);
@@ -23,9 +23,9 @@ courseRouter.post('/:courseId/add-content', verifyAccessToken, ContentController
 
 courseRouter.put('/:courseId/update', verifyAccessToken, CourseController.updateCourse);
 
-courseRouter.delete('/:courseId/full-delete', verifyAccessToken, CourseController.fullDeleteCourse);
+courseRouter.delete('/:courseId/delete', verifyAccessToken, CourseController.fullDeleteCourse);
 
-courseRouter.delete('/:courseId/delete', verifyAccessToken, CourseController.deleteCourse);
+courseRouter.delete('/:courseId/archive', verifyAccessToken, CourseController.archiveCourseById);
 
 courseRouter.post('/:courseId/enroll', verifyAccessToken, EnrollmentController.enrollUserInCourse);
 

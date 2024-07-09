@@ -7,11 +7,9 @@ dotenv.config();
 
 const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
-const DB_NAME = process.env.DB_DATABASE;
-const DB_APP_NAME = process.env.DB_APP_NAME;
-const DB_URL = process.env.DB_URL;
+const DB_NAME = process.env.DB_NAME;
 
-const mongoUri = `mongodb+srv://${DB_USER}:${DB_PASSWORD}@${DB_URL}/?retryWrites=true&w=majority&appName=${DB_APP_NAME}`;
+const mongoUri = `mongodb+srv://${DB_USER}:${DB_PASSWORD}@hhazem0010.hfwkmoz.mongodb.net/ilp_lms_api_db`
 
 class DBClient {
   constructor() {

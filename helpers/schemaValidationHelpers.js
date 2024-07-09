@@ -8,8 +8,8 @@ const validateRegisterUserSchema = Joi.object({
   password: Joi.string().min(6).required().max(64),
   firstName: Joi.string().trim().max(64),
   lastName: Joi.string().trim().max(64),
-  dateOfBirth: extendedJoi.date().format('D-M-YYYY').required().greater('1-1-1934').less('now').utc(),
-  role: Joi.string().lowercase().valid('student', 'instructor').default('student'),
+  dateOfBirth: extendedJoi.date().format('D-M-YYYY').required().greater('1-16-1934').less('now').utc(),
+  role: Joi.string().lowercase().valid('student', 'instructor', 'admin').default('student'),
 });
 
 const validateLoginUserSchema = Joi.object({
