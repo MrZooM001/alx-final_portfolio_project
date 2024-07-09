@@ -1,19 +1,21 @@
 {
     "name": "alx-webstack_portfolio",
     "version": "1.0.0",
-    "description": "ALX Webstack Portfolio Project <br /> Learning Management System API",
+    "description": "ALX Webstack Portfolio Project - API for Learning Management System",
     "main": "server.js",
-    "type": "module",
     "scripts": {
-        "devStart": "nodemon server.js",
-        "test": "mocha tests/*.js"
+        "lint": "./node_modules/.bin/eslint",
+        "check-lint": "lint [0-9]*.js",
+        "test": "./node_modules/mocha/bin/mocha --require babel-register --exit",
+        "devStart": "nodemon --exec babel-node --presets babel-preset-env ./server.js"
     },
     "keywords": [],
-    "author": "",
+    "author": "Hazem Magdy",
     "license": "ISC",
     "dependencies": {
         "@joi/date": "^2.1.1",
         "bcrypt": "^5.1.1",
+        "chai-http": "^5.0.0",
         "cors": "^2.8.5",
         "date-fns": "^3.6.0",
         "dotenv": "^16.4.5",
@@ -29,14 +31,18 @@
         "swagger-ui-express": "^5.0.1"
     },
     "devDependencies": {
-        "@types/chai": "^4.3.16",
-        "@types/mocha": "^10.0.7",
+        "babel-cli": "^6.26.0",
+        "babel-preset-env": "^1.7.0",
         "chai": "^5.1.1",
-        "chai-http": "^5.0.0",
+        "eslint": "^8.57.0",
+        "eslint-config-airbnb-base": "^15.0.0",
+        "eslint-plugin-import": "^2.29.1",
+        "eslint-plugin-jest": "^28.6.0",
+        "jest": "^29.7.0",
         "mocha": "^10.6.0",
-        "mongodb-memory-server": "^9.4.0",
         "nodemon": "^3.1.4",
-        "supertest": "^7.0.0",
+        "request": "^2.88.2",
+        "sinon": "^18.0.0",
         "ts-node": "^10.9.2",
         "typescript": "^5.5.3"
     }
