@@ -22,9 +22,6 @@ adminRouter.post('/users/register-bulk', verifyAccessToken, checkUserRole, Users
 // Get all archived courses
 adminRouter.get('/archive', verifyAccessToken, checkUserRole, QueryController.getAllArchivedCourses);
 
-// get active users count as statistics from Redis cache
-adminRouter.get('/active-users', verifyAccessToken, UsersController.getActiveUsers);
-
 // Update user role by admin
 adminRouter.put('/users/:userId/update-role', verifyAccessToken, checkUserRole, UsersController.updateUserRole);
 

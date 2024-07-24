@@ -1,5 +1,9 @@
 import express from 'express';
 import AppController from '../controllers/AppController.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
+const HOST = process.env.HOST || 'https://ilearningplatform.me/';
 
 const appRouter = express.Router();
 
@@ -7,7 +11,8 @@ const appRouter = express.Router();
 appRouter.get('/', async (req, res) => {
   res.status(200).json({
     greeting: "Hi fellas!",
-    message: "Welcome to Innovative Learning Platform API - a learning management system",
+    message: "Welcome to Innovative Learning Platform API - a full featured learning management system",
+    docs: `${HOST}api/docs`
   });
 });
 
