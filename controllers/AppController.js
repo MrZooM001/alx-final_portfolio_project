@@ -1,5 +1,6 @@
 import redisClient from "../utils/redis.js";
 import dbClient from "../utils/db.js";
+import { getActiveSessions } from '../helpers/sessionHelpers.js';
 
 class AppController {
   /**
@@ -21,17 +22,29 @@ class AppController {
    */
   static async getStatus(req, res) {
     const status = {
-      redis: redisClient.isAlive(),
-      mongodb: dbClient.isAlive(),
+      redis: {
+        isAlive: redisClient.isAlive(),
+      },
+      mongodb: {
+        isAlive: dbClient.isAlive()
+      },
     };
     res.status(200).json(status);
   }
 
-
   static async getStats(req, res) {
-    const countUsers = await dbClient.countUsers();
-    const countCourses = await dbClient.countCourses();
-    res.status(200).json({ users: countUsers, courses: countCourses });
+    try {
+      const countUsers = await dbClient.countUsers();
+      const countCourses = await dbClient.countCourses();
+      const activeUsers = await getActiveSessions();
+      res.status(200).json({
+        users: countUsers,
+        courses: countCourses,
+        activeUsers
+      });
+    } catch (err) {
+      res.status(400).json({ error: `Failed to retrieve stats, ${err.message}` });
+    }
   }
 }
 

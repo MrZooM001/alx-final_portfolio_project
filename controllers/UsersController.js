@@ -85,14 +85,6 @@ class UsersController {
     }
   }
 
-  static async getActiveUsers(req, res) {
-    try {
-      const activeUsers = await getActiveSessions();
-      res.status(200).json({ activeUsers });
-    } catch (err) {
-      return res.status(400).json({ error: `Failed to retrieve active users, ${err.message}` });
-    }
-  }
 
   static async updateUser(req, res) {
     try {

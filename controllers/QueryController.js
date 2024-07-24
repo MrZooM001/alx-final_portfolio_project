@@ -80,8 +80,6 @@ class QueryController {
         });
       }
 
-
-
       const results = await courseModel.aggregate(atomicOptions);
 
       let totalFound = results[0].totalCourses[0] ? results[0].totalCourses[0].count : 0;

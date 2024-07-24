@@ -1,8 +1,9 @@
-import * as chai from 'chai';
-import server from '../server.js';
-import request from 'supertest';
-
+const chai = require('chai');
+const chaiHttp = require('chai-http');
+const server = require('../server.js');
 const { expect } = chai;
+
+use(chaiHttp);
 
 describe('Course Enrollment API Integration Tests', () => {
   let token;
@@ -12,33 +13,30 @@ describe('Course Enrollment API Integration Tests', () => {
       .post('/auth/login')
       .send({ email: 'admin@example.com', password: 'password' })
       .end((err, res) => {
-        if (err) return done(err);
         token = res.body.token;
         done();
       });
   });
 
   it('should enroll a user in a course', (done) => {
-    const courseId = '667d9fb6fc3bcc9600a90cca';
+    const courseId = 'courseId123';
     request(server)
       .post(`/courses/${courseId}/enroll`)
       .set('Authorization', `Bearer ${token}`)
       .end((err, res) => {
-        if (err) return done(err);
-        expect(res.status).to.equal(200);
+        expect(res).to.have.status(200);
         expect(res.body).to.have.property('message', 'Enrolled successfully');
         done();
       });
   });
 
   it('should disenroll a user from a course', (done) => {
-    const courseId = '667d9fb6fc3bcc9600a90cca';
+    const courseId = 'courseId123';
     request(server)
       .post(`/courses/${courseId}/disenroll`)
       .set('Authorization', `Bearer ${token}`)
       .end((err, res) => {
-        if (err) return done(err);
-        expect(res.status).to.equal(200);
+        expect(res).to.have.status(200);
         expect(res.body).to.have.property('message', 'Disenrolled successfully');
         done();
       });
