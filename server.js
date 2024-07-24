@@ -42,7 +42,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: HOST,
+        url: HOST
       }
     ]
   },

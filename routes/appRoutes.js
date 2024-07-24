@@ -3,7 +3,7 @@ import AppController from '../controllers/AppController.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
-const HOST = process.env.HOST || 'https://ilearningplatform.me/';
+const HOST = 'https://ilearningplatform.me/';
 
 const appRouter = express.Router();
 

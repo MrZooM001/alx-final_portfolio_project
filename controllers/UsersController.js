@@ -85,7 +85,6 @@ class UsersController {
     }
   }
 
-
   static async updateUser(req, res) {
     try {
       const userId = req.user._id;
